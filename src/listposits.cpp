@@ -9,6 +9,7 @@
 #include "posit10.hpp"
 #include "posit8.hpp"
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include <typeinfo>
 
@@ -97,31 +98,64 @@ public:
     inverse
  */
 template <class X>
-void print1(X x, const char * format)
+void print1(std::ostream &ons,X x, const char * format,bool binaryoutput)
 {
     using PT = typename X::PT;
+    using PTU = typename PT::POSIT_UTYPE;
+    using PTS = typename PT::POSIT_STYPE;
     using pt = typename printableinttype<typename X::value_t>::type;
-    typename X::value_t i = x.v;
-        auto u(x.unpack()); // unpack it OK
+    PTS i = x.v;
+    PTU u = *(PTU*)&i;
+        auto up(x.unpack()); // unpack it OK
         auto l(x.unpack_low()); // unpack it OK
-        char c= '\t';
-        for(const char * p0 = format; *p0 ; ++p0)
+        if(!binaryoutput)
         {
-            switch(*p0)
+            char c= '\t';
+             for(const char * p0 = format; *p0 ; ++p0)
             {
-                case 'i': std::cout << c<<pt(i) ;  break;
-                case 'p': std::cout << c<<posit_formatter<X>(x) ; break;
-                case 'b': std::cout <<c << std::bitset<X::vtotalbits>(i); break;            
-                case 'k': std::cout << c << std::dec << pt(l.regime) ;  break;
-                case 'r': std::cout << c << pow(2,PT::POSIT_REG_SCALE*pt(l.regime)) ;  break;
-                case 'e': std::cout << c<< std::dec << pt(u.exponent); break;
-                case 'u': std::cout << c << u; break;
-                //TODO case 'f': std::cout << c<<"1." << pt(l.fraction); break;
-                //TODO case 'F': std::cout << c<<"1." << pt(l.fraction); break;
-                case 'v': std::cout << c << (double)x; break;
-                break;
+                switch(*p0)
+                {
+                    case 'i': ons << c<<pt(i) ;  break;
+                    case 'o': ons << c<<pt(u) ;  break;
+                    case 'p': ons << c<<posit_formatter<X>(x) ; break;
+                    case 'b': ons <<c << std::bitset<X::vtotalbits>(i); break;            
+                    case 'k': ons << c << std::dec << pt(l.regime) ;  break;
+                    case 'r': ons << c << pow(2,PT::POSIT_REG_SCALE*pt(l.regime)) ;  break;
+                    case 'e': ons << c<< std::dec << pt(up.exponent); break;
+                    case 'u': ons << c << up; break;
+                    //TODO case 'f': ons << c<<"1." << pt(l.fraction); break;
+                    //TODO case 'F': ons << c<<"1." << pt(l.fraction); break;
+                    case 'v': ons << c << (double)x; break;
+                    break;
+                }
             }
         }
+        else
+        {
+            double q =0;
+            for(const char * p0 = format; *p0 ; ++p0)
+            {
+                bool ok =true;
+                switch(*p0)
+                {
+                    case 'i':                         q = pt(i) ;  break;
+                    case 'o':                         q = pt(u) ;  break;
+                    case 'p': q = 0 ; break;
+                    case 'b': q=0; break;            
+                    case 'k': q= pt(l.regime) ;  break;
+                    case 'r': q= pow(2,PT::POSIT_REG_SCALE*pt(l.regime)) ;  break;
+                    case 'e': q= pt(up.exponent); break;
+                    case 'u': q=up; break;
+                    //TODO case 'f': ons << c<<"1." << pt(l.fraction); break;
+                    //TODO case 'F': ons << c<<"1." << pt(l.fraction); break;
+                    case 'v': q=(double)x; break;
+                    default:
+                        ok =false;
+                }            
+                if(ok)
+                ons.write((char*)&q,sizeof(q));
+            }
+        }   
 }
 
 template <class X>
@@ -145,7 +179,8 @@ int listpositsT(const char * format)
 #endif
     if(!*format || strchr(format,'h') != 0)
     {
-        std::cout << 
+        std::cout <<
+        "B: binary output\n" 
         "H: overview only\n"
         "N: no overview\n"
         "U: unsigned order\n"
@@ -156,6 +191,7 @@ int listpositsT(const char * format)
         "i: signed integer\n"
         "b: binary form\n"
         "u: unpacked\n"
+        "o: unsigned \n"
         //"B: bits sizes: R E F\n"
         "k: k factor\n"
         "e: exponent\n"
@@ -172,6 +208,7 @@ int listpositsT(const char * format)
     bool dotwice = false;
     bool dohalf = false;
     bool unsignedorder = false;
+    bool binaryoutput = false;
     for(const char * po = format; *po ; ++po)
     {
         switch(*po)
@@ -182,9 +219,14 @@ int listpositsT(const char * format)
             case '2': dotwice = true; break;
             case 'A': dohalf = true; break;
             case 'U': unsignedorder = true;break;
+            case 'B': binaryoutput = true; noheader=true; break;
             default:
                 break;
         }
+    }
+    if(binaryoutput)
+    {
+
     }
     if(!noheader)
     {
@@ -227,34 +269,43 @@ int listpositsT(const char * format)
 
     using nt=typename nextinttype<typename X::value_t>::type;
     using pt = typename printableinttype<typename X::value_t>::type;
-    if(unsignedorder)
+    if(!binaryoutput)
     {
-        std::cout << "looping unsigned " <<  std::dec <<  nt(0) << " to " <<  nt((1<<X::vtotalbits)-1)<< std::endl;
-    }
-    else
-    {
-        std::cout << "looping signed " <<  std::dec <<  pt(X::PT::POSIT_MIN) << " to " <<  pt(X::PT::POSIT_MAX) << std::endl;
-    }
-
-    for(const char * p0 = format; *p0 ; ++p0)
-    {
-        char c= '\t';
-        switch(*p0)
+        if(unsignedorder)
         {
-            case 'i': std::cout << c<<"signed_int" ;  break;
-            case 'p': std::cout << c<<"posit" ; break;
-            case 'b': std::cout <<c << "bits"; break;            
-            case 'k': std::cout << c << "k";  break;
-            case 'e': std::cout << c<< "exponent" ; break;
-            case 'u': std::cout << c << "unpacked"; break;
-            case 'r': std::cout << c << "regime"; break;
-            case 'v': std::cout << c << "float"; break;
-            break;
-            default:
-                break;
+            std::cout << "looping unsigned " <<  std::dec <<  nt(0) << " to " <<  nt((1<<X::vtotalbits)-1)<< std::endl;
+        }
+        else
+        {
+            std::cout << "looping signed " <<  std::dec <<  pt(X::PT::POSIT_MIN) << " to " <<  pt(X::PT::POSIT_MAX) << std::endl;
         }
     }
-    std::cout << std::endl;
+
+    if(!binaryoutput)
+    {
+        for(const char * p0 = format; *p0 ; ++p0)
+        {
+            char c= '\t';
+            switch(*p0)
+            {
+                case 'i': std::cout << c<<"signed_int" ;  break;
+                case 'p': std::cout << c<<"posit" ; break;
+                case 'b': std::cout <<c << "bits"; break;            
+                case 'k': std::cout << c << "k";  break;
+                case 'e': std::cout << c<< "exponent" ; break;
+                case 'u': std::cout << c << "unpacked"; break;
+                case 'r': std::cout << c << "regime"; break;
+                case 'v': std::cout << c << "float"; break;
+                break;
+                default:
+                    break;
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    std::ofstream conf("tmp",std::ios::binary); // the true
+    std::ostream & ons = binaryoutput? conf: std::cout;
 
 
     // scan all the 2**totalbits values
@@ -264,14 +315,15 @@ int listpositsT(const char * format)
         {
             typename X::value_t i = SIGNEX(j,X::vtotalbits-1);
             X x(typename X::DeepInit(),i); // load the posit OK
-            print1(x,format);
+            print1(ons,x,format,binaryoutput);
             if(doinverse)   
-                print1(x.inv(),format);
+                print1(ons,x.inv(),format,binaryoutput);
             if(dotwice)
-                print1(x*X(2),format);
+                print1(ons,x*X(2),format,binaryoutput);
             if(dohalf)
-                print1(x/X(2),format);
-            std::cout << std::endl;
+                print1(ons,x/X(2),format,binaryoutput);
+            if(!binaryoutput)
+                std::cout << std::endl;
         }
     }
     else
@@ -281,14 +333,15 @@ int listpositsT(const char * format)
     	{
             //typename X::value_t i = SIGNEX(j,X::vtotalbits-1);
     		X x(typename X::DeepInit(),i); // load the posit OK
-            print1(x,format);
+            print1(ons,x,format,binaryoutput);
             if(doinverse)   
-                print1(x.inv(),format);
+                print1(ons,x.inv(),format,binaryoutput);
             if(dotwice)
-                print1(x*X(2),format);
+                print1(ons,x*X(2),format,binaryoutput);
             if(dohalf)
-                print1(x/X(2),format);
-            std::cout << std::endl;
+                print1(ons,x/X(2),format,binaryoutput);
+            if(!binaryoutput)
+                ons << std::endl;
             /*
             X xt(x.twice());
             X xh(x.half());
@@ -316,6 +369,7 @@ int listpositsT(const char * format)
             */
     	} while (i++ < X::PT::POSIT_MAX);
     }
+    ons << std::flush;
 	return 0;
 }
 

@@ -63,6 +63,7 @@ Listposits allows to print the stats about any supported Posit type or list all 
         2: twice
         A: half
         U: unsigned order instead of signed order
+        B: binary output emitting all doubles without header
 
         i: signed integer
         b: binary form
