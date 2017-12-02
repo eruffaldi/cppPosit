@@ -10,7 +10,7 @@ n10 = arrayfun(@(x) {10,x,sprintf('positint16_t,10,%d,uint16_t,false.bin',x)},0:
 n12 = arrayfun(@(x) {12,x,sprintf('positint16_t,12,%d,uint16_t,false.bin',x)},0:4,'UniformOutput',false);
 p12 = cellvcat(cellfun(@(x) loadpositdump(['../build/' x{3}],x{1},x{2}),n12,'UniformOutput',false));
 
-%%
+%%  
 [u,h] = halfinrange(-10,10);      
 tf16=dump2table([-length(u)/2:(length(u)/2-1);cast(u,'double');h]');
 tf16.bits=16;
@@ -22,7 +22,13 @@ p12e=[f16;p12];
 p10e=[f16;p10];
 
 %%
+qss1={[p8;p10;p12;f16]};
+qss1=limittab(qss1,-1,1,'exclusive');
 qss={p8,p10,p12,f16};
+qss=limittab(qss,-1,1,'exclusive');
+%%
+p81=qss{1};
+
 %%
     colors =[[0 0.4470 0.7410];[0.8500 0.3250 0.0980];[0.9290 0.6940 0.1250];[0.4940 0.1840 0.5560];[0,1,1]];
 
@@ -32,22 +38,18 @@ for K=1:length(qss)
     figure;
     s=[];
     h=[];
-    for I=1:length(qs)
-        pd=qs(I,:);
-        p=double(pd.data{1});
-        usenan=false;
-        h(I)=plot(p(:,1),p(:,3),'Color',colors(I,:));
+    for I=1:height(qs)
+        h(I)=plot(qs.signed{I},qs.float{I},'Color',colors(mod(I,length(colors))+1,:));
         hold on
-        plot(p(:,1),p(:,3),['*'],'Color',colors(I,:));
-        if pd.what=='float'
+        plot(qs.signed{I},qs.float{I},['*'],'Color',colors(mod(I,length(colors))+1,:));
+        if qs.what(I)=='float'
          s{I} =sprintf('float16');
         else
-         s{end+1} =sprintf('posit%d es=%d',pd.bits,pd.es);
+         s{end+1} =sprintf('posit%d es=%d',qs.bits(I),qs.es(I));
         end
-    ylim([-10,10]);
+    ylim([-1,1]);
     end
     yl =ylim;
-    title(sprintf('Posits %d bits with Y limit %f %f',bits,yl(1),yl(2)));
 
     hold off
     legend(h,s);
@@ -64,7 +66,9 @@ end
 % title(sprintf('float16 in range %f %f',yl(1),yl(2)));
 
 %%
-qss={p10e};
+qss={p10e,f16};
+qss=limittab(qss,-1,1,'exclusive');
+
 %%
 for K=1:length(qss)
     qs=qss{K};
@@ -76,11 +80,14 @@ for K=1:length(qss)
         bits =qs.bits(I);
         isfloatx = qs.what(I) == 'float';
         es=qs.es(I);
+%        if es >0
+ %           continue
+  %      end
         usenan=false;
-        h(I)=plot(p.float{I},p.res{I},'Color',colors(I,:));
+        h(I)=plot(qs.float{I},qs.res{I},'Color',colors(I,:));
         hold on
-        plot(p(:,3),p(:,4),['.'],'Color',colors(I,:));
-        if isfloatx
+        plot(qs.float{I},qs.res{I},['.'],'Color',colors(I,:));
+        if qs.what(I) =='float'
             s{I} =sprintf('float%d',bits);
         else
             s{I} = sprintf('posit%d es %d',bits,es);
@@ -90,5 +97,5 @@ for K=1:length(qss)
     ylabel('Resolution');
     legend(h,s);
     hold off
-    xlim([-10,10]);
+    xlim([-1,1]);
 end
