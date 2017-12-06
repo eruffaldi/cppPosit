@@ -22,6 +22,13 @@
 #include "posit8_tbl.cpp"
 #include "posit8.cpp"
 
+/*
+#include "tvalids.hpp"
+
+Supported: tvalid<int8_t,4,10,?>
+#warning Available: tvalid<int8_t,4,10,?>
+*/
+
 using XT=POSIT_TYPEID;
 #else
 
@@ -250,7 +257,10 @@ int listpositsT(const char * format)
             std::cout << "without signed infinity and NaN" << std::endl;
             std::cout << "infinity "  << (typename printableinttype<typename X::value_t>::type)(X::PT::POSIT_PINF) << " " << std::bitset<sizeof(typename X::value_t)*8>(X::PT::POSIT_PINF)  << std::endl;
         }
+        std::cout   << " half=" << (double)X(X::PT::POSIT_HALF) << " twice=" <<  (double)X(X::PT::POSIT_TWO) <<std::endl;
+        std::cout   << " min=" << (double)X(X::PT::POSIT_MIN) << " " << (std::bitset<X::vtotalbits>(X::PT::POSIT_MIN)) <<  " max=" << X(X::PT::POSIT_MAX)  <<std::endl;
 
+        /*
         {
             // TODO populate std::limits
             typename X::value_t i1 = X::PT::POSIT_PINF-1;
@@ -262,6 +272,7 @@ int listpositsT(const char * format)
             std::cout << "maximum:" << std::hex << typename  printableinttype<typename X::value_t>::type(i2) << " " << (std::bitset<X::vtotalbits>(i2)) << " " << posit_formatter<X>(Mx) << " " << std::setprecision(12) << (double)Mx<< std::endl;
         }
         int failed = 0;
+        */
         if(headonly)
             return 0;
 

@@ -62,17 +62,17 @@ public:
 	explicit posit8(UnpackedT u) : v(FPT(u).v) {}
 
 	bool is_negative() const { return v < 0; }
-	bool has_neg_exponent() const { return (v & 0x40) == 0; }
-	bool is_nan() const { return PT::withnan && v == -128; }
-	bool is_infinity() const { return PT::withnan ? (v == -127 || v == 127) : v == -128;}
-	static posit8 max() { return posit8(DeepInit(),PT::withnan ? 126 : 127); }
-	static posit8 min() { return posit8(DeepInit(),PT::withnan ? -126 : -127); }
-	static posit8 one() { return posit8(DeepInit(),0x40); }
+	bool has_neg_exponent() const { return (v & POSIT_INVERTBIT) == 0; }
+	bool is_nan() const { return PT::withnan && v == PT:POSIT_NAN; }
+	bool is_infinity() const { return (v == PT::POSIT_PINF || v == PT::POSIT_NINF);}
+	static posit8 max() { return posit8(DeepInit(),PT::POSIT_MAX); } // 126 or 127
+	static posit8 min() { return posit8(DeepInit(),PT::POSIT_MIN); } //  ? -126 : -127
+	static posit8 one() { return posit8(DeepInit(),PT::POSIT_ONE); } // 0x40
 	static posit8 two() { return posit8(DeepInit(),72); }
 	static posit8 onehalf() { return posit8(DeepInit(),0x20); }
-	static posit8 pinfinity() { return posit8(DeepInit(),PT::withnan ? 127: -128); }
-	static posit8 ninfinity() { return posit8(DeepInit(),PT::withnan ?-127: -128); }
-	static posit8 nan() { return posit8(DeepInit(),PT::withnan ?-128: 0); }
+	static posit8 pinfinity() { return posit8(DeepInit(),PT::POSIT_PINF); } // ? 127: -128); }
+	static posit8 ninfinity() { return posit8(DeepInit(),PT::POSIT_NINF); } //,PT::withnan ?-127: -128); }
+	static posit8 nan() { return posit8(DeepInit(),PT::POSIT_NAN); } // withnan ?-128: 0); }
 
 	posit8 inv() const { return posit8(DeepInit(),posit8ns::opinv[uu()]); }
 	posit8 half() const { return posit8(DeepInit(),posit8ns::ophalf[uu()]);}
@@ -97,7 +97,7 @@ public:
 	posit8& operator+=(const posit8 &a) { posit8 r = *this+a; v = r.v; return *this; }
 	posit8& operator*=(const posit8 &a) { posit8 r = *this*a; v = r.v; return *this; }
 
-	unsigned int uu() const { return (unsigned int)(uint8_t)v;}
+	PTU uu() const { return (unsigned int)(uint8_t)v;}
 
 	FPT as_posit() const { return FPT(typename FPT::DeepInit(), v); }
 	operator FPT() const { return as_posit(); }

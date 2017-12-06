@@ -23,12 +23,12 @@ p10e=[f16;p10];
 
 %%
 qss1={[p8;p10;p12;f16]};
-qss1=limittab(qss1,-1,1,'exclusive');
+qss1=limittab(qss1,-2,2,'exclusive');
 qss={p8,p10,p12,f16};
-qss=limittab(qss,-1,1,'exclusive');
+qss=limittab(qss,-2,2,'exclusive');
 %%
 p81=qss{1};
-
+p8z =p81(1,:);
 %%
     colors =[[0 0.4470 0.7410];[0.8500 0.3250 0.0980];[0.9290 0.6940 0.1250];[0.4940 0.1840 0.5560];[0,1,1]];
 

@@ -59,17 +59,29 @@ struct PositTrait
 	enum : POSIT_STYPE {
 		POSIT_REG_SCALE = 1<<esbits,
 
-		// 1[holder-total] 1 0[total-1]
-		POSIT_MIN = (POSIT_STYPE)(POSIT_UTYPE(~0) << (totalbits-1)),
-		// 0[holder-total] 0 1[total-1]
-		POSIT_MAX = (POSIT_STYPE)((POIST_ONEHELPER<< (totalbits-1))-1),
+		_POSIT_TOP = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1))),
+		_POSIT_TOPRIGHT = (POSIT_STYPE)((POIST_ONEHELPER<< (totalbits-1))-1),
+		_POSIT_TOPLEFT = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1)))+1,
 
 		// 10000000 
-		POSIT_PINF =  withnan_ ? (POSIT_STYPE)((POIST_ONEHELPER<< (totalbits-1))-1) : (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1))) , // 1[sign] 000000 or N-1 111 bits
-		POSIT_NINF =  (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1))) + (withnan_ ? +1: 0), // 1[sign] 000000 +1
-		POSIT_NAN  = (POSIT_STYPE)(POSIT_UTYPE(~0) << (totalbits-1)), // infinity in withnan=false otherwise it is truly nan
+		POSIT_PINF =  withnan_ ? _POSIT_TOPRIGHT: _POSIT_TOP , // 1[sign] 000000 or N-1 111 bits
+		POSIT_NINF =  withnan_ ? _POSIT_TOPLEFT: _POSIT_TOP,
+		POSIT_NAN  = _POSIT_TOP,  // infinity in withnan=false otherwise it is truly nan
 		POSIT_ONE =  POSIT_INVERTBIT, // fine due to position of invert bit
 		POSIT_MONE = -POSIT_ONE // signed
+
+		POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>esbits)),
+
+		// 00 1[esbits+1] 0[N-2-esbitis-1]
+		POSIT_HALF = bitmask<POSIT_STYPE>(esbits+1) << (totalbits-3-esbits),
+		
+		// 1[holder-total] 1 0[total-1]
+		POSIT_MAX = _POSIT_TOPRIGHT - (withnan_ ? 1:0),
+		// 0[holder-total] 0 1[total-1]
+		POSIT_MIN = _POSIT_TOPLEFT + (withnan_? 1:0),
+
+		POSIT_SMALLPOS = 1, // right to 0
+		POSIT_SMALLNEG = -POSIT_SMALLPOS, // left to 0
 
 	};
 

@@ -92,7 +92,7 @@ We define 4 level of operations for working with Posits, then in the next sectio
 | classify(x)  | 1  |   |
 | -x  |  1 |   |
 | x <=> y  | 1 | |
-| inv(x)  | 2 (if F=0)  |   |
+| inv(x)  | 2 (if F=0) 3 otherwise |   |
 | x/2 | 2 | |
 | 2x | 2  | |
 | x+y | 3 | |
@@ -102,6 +102,22 @@ We define 4 level of operations for working with Posits, then in the next sectio
 | -> float | 3 | |
 | <- float | 3 | |
 
+## Valids 
+
+| op  | level  | notes  | 
+|---|---|---|
+| classify(x)  | 1  |   |
+| -x  |  1 |   |
+| x <=> y  | 1 | |
+| inv(x)  | 1 (exact) |   |
+| x/2 | 2 | |
+| 2x | 2  | |
+| x+y | 4 | |
+| x*y | 4 | |
+| x/y | 4 | | 
+| exp2(x) | 4  | |
+| -> float | 4 | |
+| <- float | 4 | |
 
 # Value Classes and Posit Encoding
 
