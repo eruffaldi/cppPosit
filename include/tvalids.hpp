@@ -39,6 +39,7 @@ private:
 	static T exacts[TN];
 	static T opexp2[TN*TN];
 	static T optwice[TN];
+	static T ophalf[TN];
 	static T opsquare[TN];
 	static T opmul[TN*TN];
 	static T opadd[TN*TN];

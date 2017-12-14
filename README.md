@@ -178,7 +178,13 @@ C++14 allows many operations but it is not possible to efficiently convert const
 scripts/listpositany.sh ignore -DPOSIT_TYPEID=posit12 > a
 scripts/listpositany.sh int16_t,12,2,uint16_t,false > b
 
+
 # Related
+Fixed Point Library
+https://github.com/johnmcfarlane/cnl
+        fixed_point<int, -1>
+        make_fixed<30, 1>
+        Special: elastic_fixed_point based on elastic_intger
 
 MPFR
 Boost Multiprecision: big integer could replace the fractional part, big float could replace unpacked at all

@@ -74,24 +74,24 @@ struct Unpacked
         return *this;
     }
 
-	explicit CONSTEXPRME Unpacked(float p) { unpack_float(p); }
-	explicit CONSTEXPRME Unpacked(double p) { unpack_double(p); }
-    explicit CONSTEXPRME Unpacked(halffloat p) { unpack_half(p); }
-    explicit CONSTEXPRME Unpacked(Type t , bool anegativeSign = false): type(t) ,negativeSign(anegativeSign) {};
+	explicit CONSTEXPR14 Unpacked(float p) { unpack_float(p); }
+	explicit CONSTEXPR14 Unpacked(double p) { unpack_double(p); }
+    explicit CONSTEXPR14 Unpacked(halffloat p) { unpack_half(p); }
+    explicit CONSTEXPR14 Unpacked(Type t , bool anegativeSign = false): type(t) ,negativeSign(anegativeSign) {};
 
     // expect 1.xxxxxx otherwise make it 0.xxxxxxxxx
-    explicit CONSTEXPRME Unpacked(ET aexponent, FT afraction, bool anegativeSign ): type(Regular) ,negativeSign(anegativeSign),exponent(aexponent),fraction(afraction)  {}
+    explicit CONSTEXPR14 Unpacked(ET aexponent, FT afraction, bool anegativeSign ): type(Regular) ,negativeSign(anegativeSign),exponent(aexponent),fraction(afraction)  {}
 
-	CONSTEXPRME void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
-	CONSTEXPRME void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
-    CONSTEXPRME void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
+	CONSTEXPR14 void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
+	CONSTEXPR14 void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
+    CONSTEXPR14 void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
 
 	constexpr operator float () const { return  pack_xfloat<single_trait>(); }
 	constexpr operator double () const { return  pack_xfloat<double_trait>(); }
     constexpr operator halffloat() const { return  pack_xfloat<half_trait>(); }
 
 	template <class Trait>
-	CONSTEXPRME typename Trait::holder_t
+	CONSTEXPR14 typename Trait::holder_t
 	pack_xfloati() const;
 
     template <class Trait>
@@ -128,7 +128,7 @@ struct Unpacked
 	bool operator != (const Unpacked & u) const { return !(*this == u); }
     constexpr Unpacked operator-() const { return Unpacked(exponent,fraction,!negativeSign);  }
 
-    CONSTEXPRME Unpacked inv() const
+    CONSTEXPR14 Unpacked inv() const
     {
         switch(type)
         {
@@ -172,7 +172,7 @@ struct Unpacked
 	
 
 	template <class Trait>
-	CONSTEXPRME void unpack_xfloati(typename Trait::holder_t value);
+	CONSTEXPR14 void unpack_xfloati(typename Trait::holder_t value);
 
     template <class Trait>
     void unpack_xfloat(typename Trait::value_t value) // CANNOT be constexpr
@@ -379,7 +379,7 @@ struct Unpacked
 // https://www.h-schmidt.net/FloatConverter/IEEE754.html
 template <class FT, class ET>
 template <class Trait>
-CONSTEXPRME void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
+CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
 {
     ET rawexp = bitset_getT(value,Trait::fraction_bits,Trait::exponent_bits) ;
 	type = Regular;
@@ -455,7 +455,7 @@ struct fraction_bit_extract<abits,AT,bbits,BT,false,msb>
 
 template <class FT,class ET>
 template <class Trait>
-CONSTEXPRME typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
+CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
 {
 	switch(type)
 	{

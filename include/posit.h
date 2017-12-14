@@ -8,14 +8,9 @@
 using X=Posit<int32_t,4,0,uint32_t>;
 X::PT::decode_posit_rs(1)
  */
- #pragma once
+#pragma once
 #include "unpacked.h"
 
-
-
-#ifndef CONSTEXPR14
-#define CONSTEXPR14
-#endif
 
 inline float uint32_to_float(uint32_t i)
 {
@@ -68,12 +63,12 @@ struct PositTrait
 		POSIT_NINF =  withnan_ ? _POSIT_TOPLEFT: _POSIT_TOP,
 		POSIT_NAN  = _POSIT_TOP,  // infinity in withnan=false otherwise it is truly nan
 		POSIT_ONE =  POSIT_INVERTBIT, // fine due to position of invert bit
-		POSIT_MONE = -POSIT_ONE // signed
+		POSIT_MONE = -POSIT_ONE ,// signed
 
 		POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>esbits)),
 
 		// 00 1[esbits+1] 0[N-2-esbitis-1]
-		POSIT_HALF = bitmask<POSIT_STYPE>(esbits+1) << (totalbits-3-esbits),
+		POSIT_HALF = POSIT_STYPE( (POSIT_UTYPE(-1) >> (totalbits-esbits-1))) << (totalbits-3-esbits),
 		
 		// 1[holder-total] 1 0[total-1]
 		POSIT_MAX = _POSIT_TOPRIGHT - (withnan_ ? 1:0),
@@ -95,7 +90,7 @@ struct PositTrait
 
 
     // pars is T_left
-    static CONSTEXPRME std::pair<int,int> decode_posit_rs(T pars)
+    static CONSTEXPR14 std::pair<int,int> decode_posit_rs(T pars)
     {  
         const bool x = (pars & POSIT_HOLDER_MSB) != 0; // marker bit for > 1
         int aindex = x ? (~pars == 0 ? POSIT_MAXREGIME_BITS : findbitleftmostC((POSIT_UTYPE)~pars)) : (pars == 0 ? POSIT_MAXREGIME_BITS : findbitleftmostC((POSIT_UTYPE)pars)); // index is LAST with !x
@@ -152,10 +147,10 @@ template <class T,int totalbits, int esbits, class FT, bool withnan>
 class Posit;
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) -> typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT ;
+CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) -> typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT ;
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME Posit<T,totalbits,esbits,FT,withnan> pack_posit(const typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT & x);
+CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan> pack_posit(const typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT & x);
 
 /**
  * Stores the data in the MSB totalbits of T
@@ -198,12 +193,12 @@ public:
 		typename PT::POSIT_UTYPE fraction; // fraction left aligned
 	};
 
-	CONSTEXPRME Posit half() const;
-	CONSTEXPRME Posit twice() const;
-	CONSTEXPRME UnpackedLow unpack_low() const;
-	static CONSTEXPRME Posit pack_low(UnpackedLow);
-	static CONSTEXPRME UnpackedT unpacked_low2full(UnpackedLow x);
-	static CONSTEXPRME UnpackedLow unpacked_full2low(UnpackedT x);
+	CONSTEXPR14 Posit half() const;
+	CONSTEXPR14 Posit twice() const;
+	CONSTEXPR14 UnpackedLow unpack_low() const;
+	static CONSTEXPR14 Posit pack_low(UnpackedLow);
+	static CONSTEXPR14 UnpackedT unpacked_low2full(UnpackedLow x);
+	static CONSTEXPR14 UnpackedLow unpacked_full2low(UnpackedT x);
 
 
 	/// diagnostics with full details
@@ -241,18 +236,18 @@ public:
 
     static constexpr Posit ldexp(const Posit & u, int exp); // exponent product
 
-    CONSTEXPRME explicit Posit(float f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(f)).v;  }
-	CONSTEXPRME explicit Posit(double d) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(d)).v;  }
-	CONSTEXPRME explicit Posit(int f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
-	CONSTEXPRME explicit Posit(DeepInit, T x) : v(x) {} 
-	CONSTEXPRME explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
-	CONSTEXPRME explicit Posit(UnpackedLow u) : v(pack_low(u).v) {} 
+    CONSTEXPR14 explicit Posit(float f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(f)).v;  }
+	CONSTEXPR14 explicit Posit(double d) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(d)).v;  }
+	CONSTEXPR14 explicit Posit(int f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
+	CONSTEXPR14 explicit Posit(DeepInit, T x) : v(x) {} 
+	CONSTEXPR14 explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
+	CONSTEXPR14 explicit Posit(UnpackedLow u) : v(pack_low(u).v) {} 
 
 	constexpr UnpackedT unpack() const { return unpack_posit<T,totalbits,esbits,FT,withnan>(*this); }
 
 	constexpr Posit abs()  const { return Posit(DeepInit(),(v < 0 ? -v : v));  }  // could be >= infinity because infinity is sign symmetric
 	constexpr Posit neg()  const { return Posit(DeepInit(),-v); }; 
-	CONSTEXPRME Posit inv()  const;
+	CONSTEXPR14 Posit inv()  const;
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
     constexpr bool hasNaN() const { return withnan; }
@@ -274,7 +269,7 @@ public:
 		return pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()*b.unpack());
 	}
 
-	CONSTEXPRME Posit & operator*= (const Posit & b)
+	CONSTEXPR14 Posit & operator*= (const Posit & b)
 	{
 		*this = pack_posit<T,totalbits,esbits,FT,withnan>(unpack()*b.unpack());
 		return *this;
@@ -381,7 +376,7 @@ std::ostream & operator << (std::ostream & ons, Posit<T,totalbits,esbits,FT,with
 /// Level 1: -exponent of unpacked
 /// Level 0: flip bits of rs
 template <class T, int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::inv() const -> Posit
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::inv() const -> Posit
 {
 	auto u = unpack_low();
 	if(u.fraction == 0)
@@ -435,7 +430,7 @@ struct msb_exp<T,hbits,ebits,false>
 };
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::unpack_low() const -> UnpackedLow
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpack_low() const -> UnpackedLow
 {
     using PT=PositTrait<T,totalbits,esbits,withnan>;
     using POSIT_UTYPE = typename PT::POSIT_UTYPE;
@@ -482,7 +477,7 @@ CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::unpack_low() const -> Unp
 }
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::pack_low(UnpackedLow x) -> Posit
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::pack_low(UnpackedLow x) -> Posit
 {
 	using PP=Posit<T,totalbits,esbits,FT,withnan>;
     using PT=typename Posit<T,totalbits,esbits,FT,withnan>::PT;
@@ -521,7 +516,7 @@ CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::pack_low(UnpackedLow x) -
 }
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::half() const -> Posit<T,totalbits,esbits,FT,withnan>
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::half() const -> Posit<T,totalbits,esbits,FT,withnan>
 {
 	UnpackedLow q = unpack_low();
 	if(q.type == UnpackedT::Regular)
@@ -550,7 +545,7 @@ CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::half() const -> Posit<T,t
 }
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::twice() const -> Posit<T,totalbits,esbits,FT,withnan>
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::twice() const -> Posit<T,totalbits,esbits,FT,withnan>
 {
 	UnpackedLow q = unpack_low();
 	if(q.type == UnpackedT::Regular)
@@ -578,7 +573,7 @@ CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::twice() const -> Posit<T,
 	}
 }
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_low2full(UnpackedLow q) -> UnpackedT
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_low2full(UnpackedLow q) -> UnpackedT
 {
     using POSIT_UTYPE = typename PT::POSIT_UTYPE;
     UnpackedT r;
@@ -594,7 +589,7 @@ CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_low2full(Unpacke
 }
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_full2low(UnpackedT x) -> UnpackedLow
+CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_full2low(UnpackedT x) -> UnpackedLow
 {
 	UnpackedLow ul;
 	ul.negativeSign = x.negativeSign;
@@ -612,7 +607,7 @@ CONSTEXPRME auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_full2low(Unpacke
 
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME Posit<T,totalbits,esbits,FT,withnan> pack_posit(const typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT & x)
+CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan> pack_posit(const typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT & x)
 {
 	using PP=Posit<T,totalbits,esbits,FT,withnan>;
 	return PP::pack_low(PP::unpacked_full2low(x));
@@ -673,7 +668,7 @@ auto Posit<T,totalbits,esbits,FT,withnan>::analyze() -> info
 
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
-CONSTEXPRME auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) -> typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT 
+CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) -> typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT 
 {
 	using PP=Posit<T,totalbits,esbits,FT,withnan>;
 	return PP::unpacked_low2full(p.unpack_low());

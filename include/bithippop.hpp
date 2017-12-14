@@ -10,10 +10,13 @@
 #ifndef __arm__
 #include "x86intrin.h"
 #endif
+
+#ifndef CONSTEXPR14
 #if __cplusplus >= 201402L
-#define CONSTEXPRME constexpr
+#define CONSTEXPR14 constexpr
 #else
-#define CONSTEXPRME
+#define CONSTEXPR14
+#endif
 #endif
 
 // C version
@@ -22,7 +25,7 @@
     & (((__TYPE__) -1) >> ((sizeof(__TYPE__) * 8) - (__ONE_COUNT__)))
 
 template <typename R>
-static constexpr R bitmask(unsigned int const onecount)
+constexpr R bitmask(unsigned int const onecount)
 {
     return static_cast<R>(-(onecount != 0))
         & (static_cast<R>(-1) >> ((sizeof(R) * 8) - onecount));
@@ -101,7 +104,7 @@ constexpr T bitset_part(T input, Y value)
 
 
 template <class T, class Y>
-CONSTEXPRME T bitset_part(T input, Y value, int offset, int size)
+CONSTEXPR14 T bitset_part(T input, Y value, int offset, int size)
 {
 	auto M = bitmask<T>(size);
 	return (input & ~M)|  ((value&M)<<offset);
@@ -114,7 +117,7 @@ constexpr T bitset_get(T input)
 }
 
 template <class T>
-CONSTEXPRME T bitset_get(T input, int offset, int size)
+CONSTEXPR14 T bitset_get(T input, int offset, int size)
 {
 	auto M = bitmask<T>(size);
 	return (input >> offset) & M;
@@ -217,7 +220,7 @@ constexpr T pcabs(T x)
 
 /// absolute value of signed integer without conditions
 template <class T>
-CONSTEXPRME T pabs(T x)
+CONSTEXPR14 T pabs(T x)
 {
 	T mask = (x >> (sizeof(T) * 8 - 1));
 	return (x + mask) ^ mask;
