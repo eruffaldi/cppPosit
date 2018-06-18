@@ -4,6 +4,7 @@
  g++ -I. --std=c++14 float2posit.hpp  -DTESTFLOAT2POSIT -c
  */
 #include "posit.h"
+#include "floatconst2bits.hpp"
 
 template <class T,int totalbits, int esbits, class FT, bool withnan, class Trait>
 CONSTEXPR14 T float2posit(typename Trait::holder_t value)
@@ -84,5 +85,9 @@ T float2positF(typename Trait::value_t fvalue)
 #ifdef TESTFLOAT2POSIT
 
 // import struct; print("%04X" % struct.unpack("I",struct.pack('f',3.5)))
-enum Q : int16_t { vv = float2posit<int16_t,16, 2, uint16_t, false, single_trait>(0x40600000)};
+enum Q : int16_t { 
+    v1 = float2posit<int16_t,16, 2, uint16_t, false, single_trait>(0x40600000),
+    v2 = float2posit<int16_t,16, 2, uint16_t, false, single_trait>(float2bits(3.5f)),
+
+};
 #endif
