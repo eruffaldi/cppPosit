@@ -12,8 +12,8 @@
 #include <fstream>
 #include <string.h>
 #include <typeinfo>
-#include "tvalids.hpp"
-#include "tvalids_8_1.hpp"
+//#include "tvalids.hpp"
+//#include "tvalids_8_1.hpp"
 
 #ifdef POSIT_TYPEID
 #include "posit12_tbl.cpp"
