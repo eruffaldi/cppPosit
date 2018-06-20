@@ -1,3 +1,7 @@
+*/posit12_tbl.cpp
+*/posit16_tbl.cpp
+*/float12_tbl.cpp
+*/float16_tbl.cpp
 # Prerequisites
 *.d
 
