@@ -1,0 +1,4 @@
+[submodule "softfloat"]
+	path = extern/softfloat
+	url = https://github.com/eruffaldi/berkeley-softfloat-3.git
+
