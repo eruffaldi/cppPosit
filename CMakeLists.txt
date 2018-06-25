@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 project(cppposit)
 
 #Issues with clang. Build soft float manually 
-#add_subdirectory(extern/softfloat)
-link_directories(extern/lib)
+add_subdirectory(extern/softfloat)
+#link_directories(extern/lib)
 
 #set(SYSPROC arm)
 if(SYSPROC MATCHES "arm")

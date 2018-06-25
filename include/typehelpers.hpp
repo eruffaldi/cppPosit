@@ -5,7 +5,9 @@
  */
 #pragma once
 #include <cstdint>
+#include <inttypes.h>
 
+#define int128_t __int128_t
 /// returns the larges type between two
 template <class A,class B>
 using largest_type = typename std::conditional<sizeof(A) >= sizeof(B), A, B>::type;
@@ -15,11 +17,11 @@ using largest_type = typename std::conditional<sizeof(A) >= sizeof(B), A, B>::ty
 namespace detail_least 
 {
 	template< int Category > struct int_least_helper {}; 
-	template<> struct int_least_helper<1> { typedef __int128_t least; };
-	template<> struct int_least_helper<2> { typedef __int64_t least; };
-	template<> struct int_least_helper<3> { typedef __int32_t least; };
-	template<> struct int_least_helper<4> { typedef __int16_t least; };
-	template<> struct int_least_helper<5> { typedef __int8_t least; };
+	template<> struct int_least_helper<1> { typedef int128_t least; };
+	template<> struct int_least_helper<2> { typedef int64_t least; };
+	template<> struct int_least_helper<3> { typedef int32_t least; };
+	template<> struct int_least_helper<4> { typedef int16_t least; };
+	template<> struct int_least_helper<5> { typedef int8_t least; };
 
 }
 
