@@ -90,8 +90,8 @@ int main(int argc, char const *argv[]) {
     std::cout << "N " << X::PT::POSIT_SIZE << " " << X::PT::POSIT_ESP_SIZE << std::endl;
     std::cout << "Configuration " << std::hex << " MSB = " << X::PT::POSIT_MSB << " Mask=" << X::PT::POSIT_MASK
               << " Sign=" << X::PT::POSIT_SIGNBIT << " one=" << X::PT::POSIT_ONE << " inf=" << X::PT::POSIT_PINF
-              << " half=" << (double)X(X::PT::POSIT_HALF) << " twice=" <<  (double)X(X::PT::POSIT_TWO) <<
-              << " min=" << (double)X(X::PT::POSIT_MIN) << " max=" << X(X::PT::POSIT_MAX) <<
+              << " half=" << (double)X(X::PT::POSIT_HALF) << " twice=" <<  (double)X(X::PT::POSIT_TWO) 
+              << " min=" << (double)X(X::PT::POSIT_MIN) << " max=" << X(X::PT::POSIT_MAX) 
               << " maxexponent " << X::PT::maxexponent << std::dec << std::endl;
     if(false)
     {

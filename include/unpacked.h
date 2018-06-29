@@ -8,6 +8,7 @@
 #include <iostream>
 #include <ratio>
 #include <bitset>
+#include <inttypes.h>
 #include "bithippop.hpp"
 #include <math.h>
 #include "floattraits.hpp"

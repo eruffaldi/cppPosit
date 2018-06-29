@@ -161,6 +161,22 @@ Each Posit type is linked to a corresponding Unpacked type via the fraction type
 For Posit with 8-bits we provide a distinct Posit8 type that uses tables for resolution
 
 
+# Install
+
+## Prepare softfloat
+
+Under Linux softfloat can be fully embedded
+
+## Build using Docker
+
+Dockerfile
+ FROM alpine:3.7
+ RUN apk update
+ RUN apk add --no-cache gcc musl-dev g++ cmake python3 make bash cling
+
+Run
+ docker run --rm -i -v $(pwd):/tmp alpinegxx bash 
+ 
 # Usage
 
 Interface with Eigen is possible with possible optimizations

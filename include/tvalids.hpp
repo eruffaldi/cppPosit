@@ -33,7 +33,7 @@ public:
 	using PT=PositTrait<T,TN,0,false>;
 	static constexpr int vesbits = 0;
 	using PTU=typename PT::POSIT_UTYPE;
-
+	using tposit=value_t;
 
 private:
 	static T exacts[TN];
