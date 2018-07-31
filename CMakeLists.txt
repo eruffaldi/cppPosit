@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(cppposit)
 
+#Issues with clang. Build soft float manually 
+add_subdirectory(extern/softfloat)
+#link_directories(extern/lib)
+
 #set(SYSPROC arm)
 if(SYSPROC MATCHES "arm")
 add_definitions (-D__arm__ ) 
@@ -112,7 +116,6 @@ add_executable(softfloat_gen src/softfloat_gen.cpp)
 target_link_libraries(softfloat_gen p::softfloat)
 
 if(NOT CMAKE_GENERATOR STREQUAL Xcode)
-# ${CMAKE_CURRENT_SOURCE_DIR}/src/float12_tbl.cpp 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp COMMAND DYLD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/extern LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/extern ${CMAKE_CURRENT_BINARY_DIR}/softfloat_gen ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp DEPENDS softfloat_gen)
 endif()
 add_library(softfloat16 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp)

@@ -6,6 +6,7 @@
 #pragma once
 #include <stdint.h>
 #include <iostream>
+#include <limits>
 
 #ifndef POSIT8_SPEC
 #define POSIT8_SPEC
