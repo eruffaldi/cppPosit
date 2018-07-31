@@ -2,3 +2,6 @@
 	path = extern/softfloat
 	url = https://github.com/eruffaldi/berkeley-softfloat-3.git
 
+[submodule "extern/fixed_point"]
+	path = extern/fixed_point
+	url = https://github.com/johnmcfarlane/fixed_point
