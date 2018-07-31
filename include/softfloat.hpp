@@ -91,7 +91,10 @@ struct softfloat16
 	friend softfloat16 inv(softfloat16 a) { return one()/a; }
 
 	friend bool operator == (softfloat16 a, softfloat16 b)  { return (f16_eq(a.value,b.value)); }
-	friend bool operator < (softfloat16 a, softfloat16 b)  { return (f16_le(a.value,b.value)); }
+	friend bool operator < (softfloat16 a, softfloat16 b)  { return (f16_lt(a.value,b.value)); }
+	friend bool operator > (softfloat16 a, softfloat16 b)  { return (f16_le(b.value,a.value)); }
+	friend bool operator >= (softfloat16 a, softfloat16 b)  { return (!f16_lt(b.value,a.value)); }
+	friend bool operator <= (softfloat16 a, softfloat16 b)  { return (f16_le(a.value,b.value)); }
 
 	friend std::ostream & operator << (std::ostream & ons, const softfloat16 & v)
 	{

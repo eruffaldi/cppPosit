@@ -71,7 +71,7 @@ if(POSIT8)
   endif()
 endif()
 
-add_library(posittab ${POSIT8_SRC} ${POSIT10_SRC} ${POSIT12_SRC})
+add_library(posittab STATIC ${POSIT8_SRC} ${POSIT10_SRC} ${POSIT12_SRC})
 set_property(TARGET posittab PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(POSIT8)
@@ -105,16 +105,17 @@ if(SOFTFLOAT)
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern)
 add_library(p::softfloat INTERFACE IMPORTED)
-set_property(TARGET p::softfloat PROPERTY INTERFACE_LINK_LIBRARIES softfloat)
+set_property(TARGET p::softfloat PROPERTY INTERFACE_LINK_LIBRARIES softfloat.a)
 set_property(TARGET p::softfloat PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/extern)
 
 add_executable(softfloat_gen src/softfloat_gen.cpp)
-target_link_libraries(softfloat_gen softfloat)
+target_link_libraries(softfloat_gen p::softfloat)
 
 if(NOT CMAKE_GENERATOR STREQUAL Xcode)
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/float12_tbl.cpp COMMAND DYLD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/extern LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/extern ${CMAKE_CURRENT_BINARY_DIR}/softfloat_gen ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp DEPENDS softfloat_gen)
+# ${CMAKE_CURRENT_SOURCE_DIR}/src/float12_tbl.cpp 
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp COMMAND DYLD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/extern LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/extern ${CMAKE_CURRENT_BINARY_DIR}/softfloat_gen ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp DEPENDS softfloat_gen)
 endif()
-add_library(softfloat16 ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp)
+add_library(softfloat16 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp)
 set_property(TARGET softfloat16 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/extern)
 target_link_libraries(softfloat16 p::softfloat)
 
