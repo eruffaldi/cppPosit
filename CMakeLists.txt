@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(cppposit)
 
 #Issues with clang. Build soft float manually 
-add_subdirectory(extern/softfloat)
+#add_subdirectory(extern/softfloat)
 #link_directories(extern/lib)
 
 #set(SYSPROC arm)
@@ -122,6 +122,7 @@ add_library(softfloat16 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/src/float16_tbl.cpp)
 set_property(TARGET softfloat16 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/extern)
 target_link_libraries(softfloat16 p::softfloat)
 
+
 add_executable(testsoftfloat tests/testsoftfloat.cpp)
 target_link_libraries(testsoftfloat softfloat16)
 
@@ -129,7 +130,11 @@ target_link_libraries(testsoftfloat softfloat16)
 
 endif()
 
-export(TARGETS posittab posit FILE cppposit.cmake)
+#export(EXPORT cppPosit  FILE cppPosit.cmake)
+export(TARGETS posittab posit FILE cppPosit.cmake)
 include_directories(extern)
 
-
+install (TARGETS softfloat16 DESTINATION lib)
+install (TARGETS posittab DESTINATION lib) #INTERFACE_INCLUDE_DIRECTORIES include )
+install(DIRECTORY include/ DESTINATION include/cppPosit)
+#install(EXPORT cppPosit DESTINATION lib/cppPosit )
