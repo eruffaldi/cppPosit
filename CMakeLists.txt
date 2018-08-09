@@ -128,13 +128,13 @@ target_link_libraries(testsoftfloat softfloat16)
 
 #set_property(TARGET softfloat16 PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/extern/softfloat)
 
+install (TARGETS softfloat16 DESTINATION lib)
 endif()
 
 #export(EXPORT cppPosit  FILE cppPosit.cmake)
 export(TARGETS posittab posit FILE cppPosit.cmake)
 include_directories(extern)
 
-install (TARGETS softfloat16 DESTINATION lib)
 install (TARGETS posittab DESTINATION lib) #INTERFACE_INCLUDE_DIRECTORIES include )
 install(DIRECTORY include/ DESTINATION include/cppPosit)
 #install(EXPORT cppPosit DESTINATION lib/cppPosit )
