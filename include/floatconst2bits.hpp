@@ -1,7 +1,10 @@
 #pragma once
+#include <floattraits.hpp>
 // http://brnz.org/hbr/?p=1518
 // Based on code from 
 // https://graphics.stanford.edu/~seander/bithacks.html
+//
+// TODO double version by Emanuele Ruffaldi
 constexpr int count_leading_zeroes(uint64_t v) 
 { 
   constexpr char bit_position[64] = {  
@@ -20,7 +23,8 @@ constexpr int count_leading_zeroes(uint64_t v)
     
   return 63 - bit_position[(v * 0x0218a392cd3d5dbf)>>58]; // [3]
 }
-  
+ 
+// original 
 constexpr uint32_t float2bits(float f) 
 { 
   if (f == 0.0f) 
@@ -32,7 +36,7 @@ constexpr uint32_t float2bits(float f)
   else if (f != f) // NaN 
     return 0x7fc00000; // This is my NaN...
   
-  bool sign = f < 0.0f; 
+  uint32_t  sign = f < 0.0f; 
   float abs_f = sign ? -f : f; 
   
   int exponent = 254; 
@@ -43,7 +47,7 @@ constexpr uint32_t float2bits(float f)
     exponent -= 41; 
   } 
   
-  uint64_t a = (uint64_t)(abs_f * 0x1p-64f); 
+  auto a = (uint64_t)(abs_f * 0x1p-64f); 
   int lz = count_leading_zeroes(a);
   exponent -= lz;
   
@@ -56,3 +60,47 @@ constexpr uint32_t float2bits(float f)
   uint32_t significand = (a << (lz + 1)) >> (64 - 23); // [3]
   return (sign << 31) | (exponent << 23) | significand; 
 }
+
+#if 0
+template <class float_trait>
+constexpr typename float_trait::holder_t float2bitsx(typename float_trait::value_t f) 
+{ 
+  if (f == float_trait::zero) 
+    return 0; // also matches -0.0f and gives wrong result 
+  else if (f == float_trait::pinfinity) 
+    return float_trait::pinfinity_h; 
+  else if (f == float_trait::ninfinity) 
+    return float_trait::ninfinity_h;  
+  else if (f != f) // NaN 
+    return float_trait::nan_h; // This is my NaN... 
+  
+  typename float_trait::holder_t  sign = f < float_trait::zero; 
+  typename float_trait::value_t abs_f = sign ? -f : f; 
+  
+  int exponent = float_trait::exponent_max; 
+  
+  while(abs_f < 0x1p87)  // TODO
+  { 
+    abs_f *= 0x1p41; // TODO  
+    exponent -= 41;  // TODO
+  } 
+  
+  auto a = (uint64_t)(abs_f * 0x1p-64);  // TODO
+  int lz = count_leading_zeroes(a);
+  exponent -= lz;
+  
+  if (exponent <= 0) 
+  { 
+    exponent = 0; 
+    lz = float_trait::exponent_bits - 1;
+  } 
+  
+  uint64_t significand = (a << (lz + 1)) >> (64 - float_trait::fraction_bits); // [3]
+  return (sign << (float_trait::data_bits-1)) | (((typename float_trait::holder_t )exponent) << float_trait::fraction_bits) | significand;  // TODO:
+}
+
+constexpr double float2bits(double f) 
+{ 
+  return float2bitsx<double_trait>(f);
+}
+#endif

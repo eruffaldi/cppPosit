@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 
 
 struct halffloat
@@ -32,6 +33,9 @@ struct single_trait
 {
 	using value_t = float;
 	using holder_t = uint32_t;
+	static constexpr value_t zero = 0.0f;
+	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
+	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
     static constexpr holder_t ninfinity_h = 0xff800000;
     static constexpr holder_t pinfinity_h = 0x7f800000;
     static constexpr holder_t nan_h = 0x7fc00000;
@@ -52,6 +56,9 @@ struct double_trait
 {
 	using value_t = double;
 	using holder_t = uint64_t;
+	static constexpr value_t zero = 0.0;
+	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
+	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
     static constexpr holder_t ninfinity_h = 0xfff0000000000000ULL;
     static constexpr holder_t pinfinity_h = 0x7ff0000000000000ULL;
     static constexpr holder_t nan_h = 0x7ff8000000000000ULL;

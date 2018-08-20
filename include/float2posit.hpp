@@ -86,6 +86,18 @@ PP float2positF(typename Trait::value_t fvalue)
     return float2posit<PP,Trait>(uu.i);
 }
 
+template <class PP>
+CONSTEXPR14 PP float2positx(float value)
+{
+    return float2posit<PP,single_trait>(float2bits(value));
+}
+
+template <class PP>
+CONSTEXPR14 PP float2positx(double value)
+{
+    return float2posit<PP,double_trait>(float2bits(value));
+}
+
 
 #ifdef TESTFLOAT2POSIT
 
@@ -94,6 +106,8 @@ using PP=Posit<int16_t,16, 2, uint16_t, false>;
 enum Q : int16_t { 
     v1 = float2posit<PP,single_trait>(0x40600000).v,
     v2 = float2posit<PP,single_trait>(float2bits(3.5f)).v,
+    v3 = float2positx<PP>(3.5f).v
+    //v4 = float2posit<PP,double_trait>(float2bits(3.5)).v,
 
 };
 
@@ -101,6 +115,8 @@ int main(int argc, char const *argv[])
 {
     std::cout << PP(typename PP::DeepInit(),Q::v1) << " " << (float)PP(typename PP::DeepInit(),Q::v1) << std::endl;
     std::cout << PP(typename PP::DeepInit(),Q::v2) << std::endl;
+    std::cout << PP(typename PP::DeepInit(),Q::v3) << std::endl;
+    //std::cout << PP(typename PP::DeepInit(),Q::v4) << std::endl; // FAILS
     return 0;
 }
 #endif
