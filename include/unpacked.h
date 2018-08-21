@@ -56,23 +56,18 @@ struct Unpacked
 
     explicit constexpr Unpacked() {}
 
-    // assume fraction is denormalized form
-    constexpr const Unpacked & normalize()
+    // assume regular
+    CONSTEXPR14 Unpacked normalized() const
     {
         if(fraction == 0)
         {
-            negativeSign = false;
-            type = Zero;
+            return Unpacked(Zero,false);
         }
         else
         {
             int k = findbitleftmostC(fraction);
-
-            exponent -= k;
-            fraction <<= k+1; // plus normalization
-            type = Regular;
+            return Unpacked(exponent-k,fraction << (k+1),negativeSign);
         }
-        return *this;
     }
 
 	explicit CONSTEXPR14 Unpacked(float p) { unpack_float(p); }
@@ -212,7 +207,7 @@ struct Unpacked
                 POSIT_LUTYPE afrac1 = (POSIT_FRAC_TYPE_MSB>>1) | (a.fraction >> 2); // denormalized and shifted right
                 POSIT_LUTYPE bfrac1 = (POSIT_FRAC_TYPE_MSB>>1) | (b.fraction >> 2);
                 POSIT_LUTYPE afrac = dir < 0 ? (afrac1 >> -dir) : afrac1; // denormalized and shifted right
-                POSIT_LUTYPE bfrac = dir < 0 ? bfrac : (bfrac1 >> dir); 
+                POSIT_LUTYPE bfrac = dir < 0 ? bfrac1 : (bfrac1 >> dir); 
 
                 // 1.xxxx => 0.1xxxxx => 0.0k 1 xxxx
                 //
@@ -231,7 +226,7 @@ struct Unpacked
                 int mode = a.negativeSign == b.negativeSign ? 0 : afrac > bfrac ? 1 : -1;
                 bool osign = mode >= 0 ? a.negativeSign : b.negativeSign;
                 POSIT_LUTYPE frac = mode == 0 ? afrac+bfrac: mode > 0 ? afrac - bfrac : bfrac-afrac;
-                return Unpacked(exp, frac, osign).normalize();  // pass denormalized
+                return Unpacked(exp, frac, osign).normalized();  // pass denormalized
             }
             case UnpackedDualSel(Regular,Zero):
             case UnpackedDualSel(Zero,Zero):
@@ -300,7 +295,7 @@ struct Unpacked
                 POSIT_LUTYPE afrac = POSIT_FRAC_TYPE_MSB | (a.fraction >> 1);
                 POSIT_LUTYPE bfrac1 = POSIT_FRAC_TYPE_MSB | (b.fraction >> 1);
                 auto exp = a.exponent - b.exponent + (afrac < bfrac1 ? -1 : 0);
-                POSIT_LUTYPE bfrac = afrac < bfrac1 ? (bfrac >> 1) : bfrac1;
+                POSIT_LUTYPE bfrac = afrac < bfrac1 ? (bfrac1 >> 1) : bfrac1;
                 /*
                 if (afrac < bfrac) {
                     exp--;
@@ -390,7 +385,18 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
 	}
 	else if (rawexp == 0)
     {
-        normalize();
+        // normalized
+        if(fraction == 0)
+        {
+            type = Zero;
+            negativeSign = false;
+        }
+        else
+        {
+            int k = findbitleftmostC(fraction);
+            exponent -= k;
+            fraction <<= (k+1);
+        }
 	}
 }
 

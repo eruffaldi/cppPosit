@@ -331,9 +331,9 @@ int listpositsT(const char * format)
             if(doinverse)   
                 print1(ons,x.inv(),format,binaryoutput);
             if(dotwice)
-                print1(ons,x*X(2),format,binaryoutput);
+                print1(ons,(X)(x*X(2)),format,binaryoutput);
             if(dohalf)
-                print1(ons,x/X(2),format,binaryoutput);
+                print1(ons,(X)x/X(2),format,binaryoutput);
             if(!binaryoutput)
                 std::cout << std::endl;
         }
@@ -349,7 +349,7 @@ int listpositsT(const char * format)
             if(doinverse)   
                 print1(ons,x.inv(),format,binaryoutput);
             if(dotwice)
-                print1(ons,x*X(2),format,binaryoutput);
+                print1(ons,(X)(x*X(2)),format,binaryoutput);
             if(dohalf)
                 print1(ons,x/X(2),format,binaryoutput);
             if(!binaryoutput)

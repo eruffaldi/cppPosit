@@ -201,7 +201,7 @@ public:
 		constexpr UnpackedLow(Type t): type(t) {}
 		constexpr UnpackedLow(Type t, bool anegativeSign): type(t), negativeSign(anegativeSign) {}
 		constexpr UnpackedLow(bool n, typename PT::POSIT_STYPE r, typename PT::POSIT_UTYPE e, typename PT::POSIT_UTYPE f):
-			negativeSign(n), regime(r), exp(e), fraction(f), type(UnpackedT::Regular) {}
+			 type(UnpackedT::Regular),negativeSign(n), regime(r), exp(e), fraction(f) {}
 
 		Type type;
 		bool negativeSign; // for Regular and Infinity if applicabl
@@ -311,7 +311,7 @@ public:
         return a.iszero() ? b : b.iszero() ? a: pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()+b.unpack());
     }
 
-	constexpr Posit& operator+=(const Posit &a) { Posit r = *this+a; v = r.v; return *this; }
+	Posit& operator+=(const Posit &a) { Posit r = *this+a; v = r.v; return *this; }
 
 	static constexpr Posit zero() { return Posit(DeepInit(),0); }
 	static constexpr Posit inf() { return Posit(DeepInit(),PT::POSIT_PINF); }
