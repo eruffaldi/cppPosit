@@ -65,7 +65,7 @@ struct PositTrait
 		POSIT_ONE =  POSIT_INVERTBIT, // fine due to position of invert bit
 		POSIT_MONE = -POSIT_ONE ,// signed
 
-		POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>esbits)),
+		POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>1)),
 
 		// 00 1[esbits+1] 0[N-2-esbitis-1]
 		POSIT_HALF = POSIT_STYPE( (POSIT_UTYPE(-1) >> (totalbits-esbits-1))) << (totalbits-3-esbits),
@@ -323,6 +323,7 @@ public:
 	static constexpr Posit one() { return Posit(DeepInit(),PT::POSIT_ONE); }
 	static constexpr Posit two() { return Posit(DeepInit(),PT::POSIT_TWO); }
 	static constexpr Posit mone() { return Posit(DeepInit(),PT::POSIT_MONE); }
+	static constexpr Posit onehalf() { return Posit(DeepInit(),PT::POSIT_HALF); }
 
 	// custom operators
 	constexpr Posit operator-() const { return neg(); } 
