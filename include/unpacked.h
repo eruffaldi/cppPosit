@@ -186,7 +186,7 @@ struct Unpacked
         unpack_xfloati<Trait>(uu.i);
     }
 
-    friend Unpacked operator - (Unpacked a, Unpacked b)
+    constexpr friend Unpacked operator - (Unpacked a, Unpacked b)
     {
         return a+(-b);
     }
@@ -323,7 +323,7 @@ struct Unpacked
      * Division Truth Table
 
      */
-    friend Unpacked operator/ (const Unpacked & a, const Unpacked & b) 
+    CONSTEXPR14 friend Unpacked operator/ (const Unpacked & a, const Unpacked & b) 
     {
         if(a.isNaN() || b.isNaN())
             return a;
@@ -334,13 +334,15 @@ struct Unpacked
             case UnpackedDualSel(Regular,Regular):
             {
                 POSIT_LUTYPE afrac = POSIT_FRAC_TYPE_MSB | (a.fraction >> 1);
-                POSIT_LUTYPE bfrac = POSIT_FRAC_TYPE_MSB | (b.fraction >> 1);
-                auto exp = a.exponent - b.exponent;
-
+                POSIT_LUTYPE bfrac1 = POSIT_FRAC_TYPE_MSB | (b.fraction >> 1);
+                auto exp = a.exponent - b.exponent + (afrac < bfrac1 ? -1 : 0);
+                POSIT_LUTYPE bfrac = afrac < bfrac1 ? (bfrac >> 1) : bfrac1;
+                /*
                 if (afrac < bfrac) {
                     exp--;
                     bfrac >>= 1;
                 }
+                */
 
                 return Unpacked(exp,  (((typename nextinttype<FT>::type)afrac) << POSIT_FRAC_TYPE_SIZE_BITS) / bfrac,a.negativeSign ^ b.negativeSign);
             }
