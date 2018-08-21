@@ -8,7 +8,7 @@ void pp(P po)
 
 int main()
 {
-	using X1=Posit<int32_t,32,0,uint64_t,false>;
+	using X1=Posit<int32_t,32,1,uint64_t,true>;
 	static_assert(X1::one() == X1::one()*X1::one(),"same 1==1*1");
 	static_assert(X1::zero() == X1::one()-X1::one(),"same 0==1-1");
 	static_assert(X1::one() == X1::one()/X1::one(),"same 1==1/1");
