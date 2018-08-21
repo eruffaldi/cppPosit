@@ -57,7 +57,7 @@ struct Unpacked
     explicit constexpr Unpacked() {}
 
     // assume fraction is denormalized form
-    const Unpacked & normalize()
+    constexpr const Unpacked & normalize()
     {
         if(fraction == 0)
         {
@@ -193,7 +193,7 @@ struct Unpacked
 
     Unpacked& operator+=(const Unpacked &a) { Unpacked r = *this+a; *this = r; return *this; }
 
-    friend Unpacked operator+ ( Unpacked  a,  Unpacked  b) 
+    CONSTEXPR14 friend Unpacked operator+ ( Unpacked  a,  Unpacked  b) 
     {
         if(a.isNaN() || b.isNaN())
             return a;
@@ -202,27 +202,29 @@ struct Unpacked
             case UnpackedDualSel(Regular,Regular):
             {
                 auto dir = a.exponent-b.exponent;
-                ET exp;
+                ET exp = (dir < 0 ? b.exponent: a.exponent)+1;
 
                 // move right means increment exponent
                 // 1.xxxx => 0.1xxxxxx 
                 // 1.yyyy => 0.1yyyyyy
-                POSIT_LUTYPE afrac = (POSIT_FRAC_TYPE_MSB>>1) | (a.fraction >> 2); // denormalized and shifted right
-                POSIT_LUTYPE bfrac = (POSIT_FRAC_TYPE_MSB>>1) | (b.fraction >> 2);
-
+                POSIT_LUTYPE afrac1 = (POSIT_FRAC_TYPE_MSB>>1) | (a.fraction >> 2); // denormalized and shifted right
+                POSIT_LUTYPE bfrac1 = (POSIT_FRAC_TYPE_MSB>>1) | (b.fraction >> 2);
+                POSIT_LUTYPE afrac = dir < 0 ? (afrac1 >> -dir) : afrac1; // denormalized and shifted right
+                POSIT_LUTYPE bfrac = dir < 0 ? bfrac : (bfrac1 >> dir); 
+                
+                #if 0                
                 if(dir < 0) // output will be in the b exponent
                 {
                     // add exponent, reduce fraction
-                    exp = b.exponent;
                     afrac >>= -dir;
                 }
                 else
                 {
                     // add exponent, reduce fraction
-                    exp = a.exponent;
                     bfrac >>= dir;
                 }
                 exp++; // due to the spacing in fraction
+                #endif
 
                 // 1.xxxx => 0.1xxxxx => 0.0k 1 xxxx
                 //
@@ -238,9 +240,11 @@ struct Unpacked
                 //
                 // if 1. we easily normalize by shift
                 // if 0. we pre
-                POSIT_LUTYPE frac;
-                bool osign;
+                int mode = a.negativeSign == b.negativeSign ? 0 : afrac > bfrac ? 1 : -1;
+                bool osign = mode >= 0 ? a.negativeSign : b.negativeSign;
+                POSIT_LUTYPE frac = mode == 0 ? afrac+bfrac: mode > 0 ? afrac - bfrac : bfrac-afrac;
 
+                #if 0
                 // same is easy
                 if(a.negativeSign == b.negativeSign)
                 {
@@ -262,6 +266,7 @@ struct Unpacked
                     osign = b.negativeSign;
                     frac = bfrac-afrac;
                 }
+                #endif
                 return Unpacked(exp, frac, osign).normalize();  // pass denormalized
             }
             case UnpackedDualSel(Regular,Zero):
@@ -279,7 +284,7 @@ struct Unpacked
     // https://www.edwardrosten.com/code/fp_template.html
     // https://github.com/Melown/half
 
-    friend Unpacked operator*(const Unpacked & a, const Unpacked & b) 
+    CONSTEXPR14 friend Unpacked operator*(const Unpacked & a, const Unpacked & b) 
     {
         if(a.isNaN() || b.isNaN())
             return a;
@@ -289,14 +294,17 @@ struct Unpacked
             {
                 POSIT_LUTYPE afrac = POSIT_FRAC_TYPE_MSB | (a.fraction >> 1);
                 POSIT_LUTYPE bfrac = POSIT_FRAC_TYPE_MSB | (b.fraction >> 1);
-                auto frac = (((typename nextinttype<FT>::type)afrac) * bfrac) >> POSIT_FRAC_TYPE_SIZE_BITS;
-                auto exp = a.exponent + b.exponent + 1;
-
+                auto frac = ((((typename nextinttype<FT>::type)afrac) * bfrac) >> POSIT_FRAC_TYPE_SIZE_BITS);
+                bool q = (frac & POSIT_FRAC_TYPE_MSB) == 0;
+                auto rfrac = q ? (frac << 1): frac;
+                auto exp = a.exponent + b.exponent + (q ? 0: 1);
+                #if 0
                 if ((frac & POSIT_FRAC_TYPE_MSB) == 0) {
                     exp--;
                     frac <<= 1;
                 }
-                return Unpacked(exp, frac << 1,a.negativeSign ^ b.negativeSign);
+                #endif
+                return Unpacked(exp, rfrac << 1,a.negativeSign ^ b.negativeSign);
             }
             case UnpackedDualSel(Regular,Zero):
             case UnpackedDualSel(Zero,Regular):

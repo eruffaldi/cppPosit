@@ -179,6 +179,17 @@ public:
 	using exponenttype = typename PT::exponenttype;
 	T v; // index in the N2 space
 
+	struct PositMul
+	{
+		constexpr PositMul(Posit av, Posit bv) : a(av),b(bv) {}
+		Posit a,b;
+
+		constexpr operator Posit() const { return pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()*b.unpack()); }
+
+		// missing operators
+		// &
+		// -
+	};
 
 	/**
 	 * Minimal Unpacked representaiton of the Posit
@@ -186,6 +197,12 @@ public:
 	struct UnpackedLow
 	{
 		using Type = typename UnpackedT::Type;
+
+		constexpr UnpackedLow(Type t): type(t) {}
+		constexpr UnpackedLow(Type t, bool anegativeSign): type(t), negativeSign(anegativeSign) {}
+		constexpr UnpackedLow(bool n, typename PT::POSIT_STYPE r, typename PT::POSIT_UTYPE e, typename PT::POSIT_UTYPE f):
+			negativeSign(n), regime(r), exp(e), fraction(f), type(UnpackedT::Regular) {}
+
 		Type type;
 		bool negativeSign; // for Regular and Infinity if applicabl
 		typename PT::POSIT_STYPE regime; // decoded with sign
@@ -264,9 +281,24 @@ public:
 
 	    // Level 1: unpacked
 	// Level 0: something using posit specialties
-	friend constexpr Posit operator*(const Posit & a, const Posit & b) 
+	friend constexpr PositMul operator*(const Posit & a, const Posit & b) 
 	{
-		return pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()*b.unpack());
+		return PositMul(a,b); 
+	}
+
+	friend constexpr Posit operator+(const Posit & a, const PositMul & b)
+	{
+		return fma(b.a,b.b,a);
+	}
+
+	friend constexpr Posit operator+(const PositMul & a, const Posit & b)
+	{
+		return fma(a.a,a.b,b);
+	}
+
+	friend constexpr Posit fma(const Posit & a, const Posit & b, const Posit & c)
+	{
+		return pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()*b.unpack()+c.unpack());
 	}
 
 	CONSTEXPR14 Posit & operator*= (const Posit & b)
@@ -279,7 +311,7 @@ public:
         return a.iszero() ? b : b.iszero() ? a: pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()+b.unpack());
     }
 
-	Posit& operator+=(const Posit &a) { Posit r = *this+a; v = r.v; return *this; }
+	constexpr Posit& operator+=(const Posit &a) { Posit r = *this+a; v = r.v; return *this; }
 
 	static constexpr Posit zero() { return Posit(DeepInit(),0); }
 	static constexpr Posit inf() { return Posit(DeepInit(),PT::POSIT_PINF); }
@@ -289,6 +321,7 @@ public:
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
 	static constexpr Posit nan() { return Posit(DeepInit(),PT::POSIT_NAN); }
 	static constexpr Posit one() { return Posit(DeepInit(),PT::POSIT_ONE); }
+	static constexpr Posit two() { return Posit(DeepInit(),PT::POSIT_TWO); }
 	static constexpr Posit mone() { return Posit(DeepInit(),PT::POSIT_MONE); }
 
 	// custom operators
@@ -436,44 +469,40 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpack_low() const -> Unp
     using POSIT_UTYPE = typename PT::POSIT_UTYPE;
     //using POSIT_STYPE = typename PT::POSIT_STYPE;
 
-    UnpackedLow r;
-    T pa = v;
 	if(isinfinity()) // infinity
     {
-        r.type = UnpackedT::Infinity;
-    	if(PT::withnan)
-    		r.negativeSign = v < 0;
+    	return UnpackedLow(UnpackedT::Infinity, v < 0);
     }
     else if(isNaN())
    	{	
-   		r.type = UnpackedT::NaN;
+    	return UnpackedLow(UnpackedT::NaN);
    	}	
-    else if(pa == 0)
-        r.type = UnpackedT::Zero;
+    else if(v == 0)
+    	return UnpackedLow(UnpackedT::Zero);
 	else
 	{
         //constexpr int POSIT_RS_MAX = PT::POSIT_SIZE-1-esbits;
 
-		r.type = UnpackedT::Regular;
-		r.negativeSign = (pa & PT::POSIT_SIGNBIT) != 0;
+		//r.type = UnpackedT::Regular;
+		bool negativeSign = (v & PT::POSIT_SIGNBIT) != 0;
 		//std::cout << "unpacking " << std::bitset<sizeof(T)*8>(pa) << " abs " << std::bitset<sizeof(T)*8>(pabs(pa)) << " r.negativeSign? " << r.negativeSign << std::endl;
-        pa = pa < 0 ? -pa : pa;
+        T pa = negativeSign ? -v : v;
 	//	std::cout << "after " << std::hex << pa << std::endl;
 
-        POSIT_UTYPE pars = pa << (PT::POSIT_EXTRA_BITS+1); // MSB: RS ES FS MSB
-        auto q = PT::decode_posit_rs(pars);
+        POSIT_UTYPE pars1 = pa << (PT::POSIT_EXTRA_BITS+1); // MSB: RS ES FS MSB
+        auto q = PT::decode_posit_rs(pars1);
         int reg = q.first;
         int rs = q.second;
-        pars <<= rs; // MSB: ES FS
-        POSIT_UTYPE exp = bitset_leftmost_get_const<T,esbits>()(pars); //        bitset_leftmost_getT(pars,esbits);
-        pars <<= esbits; // MSB: FS left aligned in T
+        POSIT_UTYPE pars2 = pars1 << rs; // MSB: ES FS
+        POSIT_UTYPE exp = bitset_leftmost_get_const<T,esbits>()(pars2); //        bitset_leftmost_getT(pars,esbits);
+        POSIT_UTYPE pars = pars2 << esbits; // MSB: FS left aligned in T
 
-        r.fraction = pars;
+        return UnpackedLow(negativeSign,reg,exp,pars);
+        //r.fraction = pars;
        //std::cout << "fraction is " << std::bitset<sizeof(FT)*8>(r.fraction) << " with rs bits " << rs << " for reg " << reg << std::endl;
-        r.exp = exp;
-        r.regime = reg;
+        //r.exp = exp;
+        //r.regime = reg;
 	}
-	return r;
 }
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
@@ -591,18 +620,17 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_low2full(Unpacke
 template <class T,int totalbits, int esbits, class FT, bool withnan>
 CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_full2low(UnpackedT x) -> UnpackedLow
 {
-	UnpackedLow ul;
-	ul.negativeSign = x.negativeSign;
-	ul.type = x.type;
 	if(x.type == UnpackedT::Regular)
 	{
 		auto eexponent = clamp<decltype(x.exponent)>(x.exponent,PT::minexponent,PT::maxexponent); // no overflow
 		auto rr = PT::split_reg_exp(eexponent);
-		ul.fraction = cast_msb<FT,sizeof(FT)*8,typename PT::POSIT_UTYPE,sizeof(typename PT::POSIT_UTYPE)*8>()(x.fraction); 
-		ul.regime = rr.first;
-		ul.exp = rr.second;
+		auto frac = cast_msb<FT,sizeof(FT)*8,typename PT::POSIT_UTYPE,sizeof(typename PT::POSIT_UTYPE)*8>()(x.fraction);
+		return UnpackedLow(x.negativeSign,rr.first,rr.second,frac);
 	}
-	return ul;
+	else
+	{
+		return UnpackedLow(x.type,x.negativeSign);
+	}
 }
 
 
