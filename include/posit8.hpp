@@ -14,11 +14,6 @@
 #define POSIT8_NAN false
 #endif
 
-
-#ifndef CONSTEXPR14
-#define CONSTEXPR14
-#endif
-
 #include "posit.h"
 
 namespace posit8ns
@@ -123,7 +118,7 @@ inline posit8 square(posit8 z) { return z.square(); }
 
 inline posit8 inv(posit8 x) { return x.inv(); }
 
-CONSTEXPR14 inline posit8 neg(posit8 z) { return -z; }
+inline posit8 neg(posit8 z) { return -z; }
 
 inline posit8 exp2(posit8 z) { return z.exp2(); }
 
@@ -146,17 +141,17 @@ namespace std {
 
 namespace std
 {
-	inline CONSTEXPR14 posit8 abs(posit8 z) 
+	inline posit8 abs(posit8 z) 
 	{
 		return posit8(posit8::DeepInit(),z.v < 0 ? -z.v : z.v);
 	}
 
-	inline CONSTEXPR14 posit8 min(posit8 a, posit8 b)
+	inline posit8 min(posit8 a, posit8 b)
 	{
 		return a <=  b ? a : b;
 	}
 
-	inline CONSTEXPR14 posit8 max(posit8 a, posit8 b)
+	inline posit8 max(posit8 a, posit8 b)
 	{
 		return a >= b ? a : b;
 	}

@@ -7,10 +7,6 @@
 #include <stdint.h>
 #include <iostream>
 
-#ifndef CONSTEXPR14
-#define CONSTEXPR14
-#endif
-
 #ifndef POSIT12_SPEC
 #define POSIT12_SPEC
 #define POSIT12_ES 2
@@ -112,25 +108,25 @@ inline posit12 square(posit12 z) { return z.square(); }
 
 inline posit12 inv(posit12 x) { return x.inv(); }
 
-CONSTEXPR14 inline posit12 neg(posit12 z) { return -z; }
+inline posit12 neg(posit12 z) { return -z; }
 
 inline posit12 exp2(posit12 z) { return z.exp2(); }
 
 
 namespace std
 {
-	inline CONSTEXPR14 posit12 abs(posit12 z) 
+	inline posit12 abs(posit12 z) 
 	{
 		return posit12(posit12::DeepInit(),z.v < 0 ? -z.v : z.v);
 	}
 
 
-	inline CONSTEXPR14 posit12 min(posit12 a, posit12 b)
+	inline posit12 min(posit12 a, posit12 b)
 	{
 		return a <=  b ? a : b;
 	}
 
-	inline CONSTEXPR14 posit12 max(posit12 a, posit12 b)
+	inline posit12 max(posit12 a, posit12 b)
 	{
 		return a >= b ? a : b;
 	}

@@ -13,11 +13,6 @@
 #define POSIT10_NAN false
 #endif
 
-
-#ifndef CONSTEXPR14
-#define CONSTEXPR14
-#endif
-
 #include <limits>
 #include "posit.h"
 
@@ -132,7 +127,7 @@ inline posit10 square(posit10 z) { 	return z.square();  }
 
 inline posit10 inv(posit10 x) { return x.inv(); }
 
-CONSTEXPR14 inline posit10 neg(posit10 z) { return -z; }
+inline posit10 neg(posit10 z) { return -z; }
 
 inline posit10 exp2(posit10 z) { return z.exp2(); }
 
@@ -152,17 +147,17 @@ namespace std {
 
 namespace std
 {
-	inline CONSTEXPR14 posit10 abs(posit10 z) 
+	inline posit10 abs(posit10 z) 
 	{
 		return posit10(posit10::DeepInit(),z.v < 0 ? -z.v : z.v);
 	}
 
-	inline CONSTEXPR14 posit10 min(const posit10 &a, const posit10 & b)
+	inline posit10 min(const posit10 &a, const posit10 & b)
 	{
 		return a <=  b ? a : b;
 	}
 
-	inline CONSTEXPR14 posit10 max(const posit10 &a, const posit10 & b)
+	inline posit10 max(const posit10 &a, const posit10 & b)
 	{
 		return a >= b ? a : b;
 	}
