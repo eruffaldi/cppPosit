@@ -144,7 +144,10 @@ struct softfloat32
 	friend softfloat32 mulAdd(softfloat32 a, softfloat32 b, softfloat32 c) { return softfloat32(f32_mulAdd(a.value,b.value,c.value)); }
 
 	friend bool operator == (softfloat32 a, softfloat32 b)  { return (f32_eq(a.value,b.value)); }
-	friend bool operator < (softfloat32 a, softfloat32 b)  { return (f32_le(a.value,b.value)); }
+	friend bool operator < (softfloat32 a, softfloat32 b)  { return (f32_lt(a.value,b.value)); }
+	friend bool operator > (softfloat32 a, softfloat32 b)  { return (f32_le(b.value,a.value)); }
+	friend bool operator >= (softfloat32 a, softfloat32 b)  { return (!f32_lt(b.value,a.value)); }
+	friend bool operator <= (softfloat32 a, softfloat32 b)  { return (f32_le(a.value,b.value)); }
 
 	friend std::ostream &operator << (std::ostream & ons, const softfloat32 & v)
 	{
