@@ -54,29 +54,38 @@ struct PositTrait
 	enum : POSIT_STYPE {
 		POSIT_REG_SCALE = 1<<esbits,
 
+		// these are portable ways for representing 10000000 and the two adjacents numbers in 
+		// the posit circle
 		_POSIT_TOP = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1))),
 		_POSIT_TOPRIGHT = (POSIT_STYPE)((POIST_ONEHELPER<< (totalbits-1))-1),
 		_POSIT_TOPLEFT = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1)))+1,
 
-		// 10000000 
+		// Without Nan (classic Posit): there only one Infinity
+		// With NaN: the top element is NaN and then its adjacents correspond to +- Infinity
 		POSIT_PINF =  withnan_ ? _POSIT_TOPRIGHT: _POSIT_TOP , // 1[sign] 000000 or N-1 111 bits
 		POSIT_NINF =  withnan_ ? _POSIT_TOPLEFT: _POSIT_TOP,
 		POSIT_NAN  = _POSIT_TOP,  // infinity in withnan=false otherwise it is truly nan
 		POSIT_ONE =  POSIT_INVERTBIT, // fine due to position of invert bit
-		POSIT_MONE = -POSIT_ONE ,// signed
+		POSIT_MONE = -POSIT_ONE , // minus one
 
+		// Two
 		POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>(1+esbits))),
 
+		// 1/2
 		// 00 1[esbits+1] 0[N-2-esbitis-1]
 		POSIT_HALF = POSIT_STYPE( (POSIT_UTYPE(-1) >> (totalbits-esbits-1))) << (totalbits-3-esbits),
 		
+		// max value below Infinity
 		// 1[holder-total] 1 0[total-1]
-		POSIT_MAX = _POSIT_TOPRIGHT - (withnan_ ? 1:0),
-		// 0[holder-total] 0 1[total-1]
-		POSIT_MIN = _POSIT_TOPLEFT + (withnan_? 1:0),
+		POSIT_MAXPOS = _POSIT_TOPRIGHT - (withnan_ ? 1:0),
 
-		POSIT_SMALLPOS = 1, // right to 0
-		POSIT_SMALLNEG = -POSIT_SMALLPOS, // left to 0
+		// min value above -Infinity
+		// 0[holder-total] 0 1[total-1]
+		POSIT_MINNEG = _POSIT_TOPLEFT + (withnan_? 1:0),
+
+		// minimal number above zero
+		POSIT_AFTER0 = 1, // right to 0
+		POSIT_BEFORE0 = -POSIT_AFTER0, // left to 0
 
 	};
 
@@ -273,6 +282,8 @@ public:
 	constexpr bool isinfinity() const { return v == PT::POSIT_PINF || v == PT::POSIT_NINF; }
 	constexpr bool iszero() const { return v == 0; }
 	constexpr bool isone() const { return v == PT::POSIT_ONE; }
+	constexpr Posit prev() const { return Posit(DeepInit(),v > PT::POSIT_MAXPOS || v <= PT::POSIT_MINNEG ? v : v-1); }
+	constexpr Posit next() const { return Posit(DeepInit(),v <= PT::POSIT_MINNEG || v > PT::POSIT_MAXPOS ? v : v+1); }
 	//TBDconstexpr bool isNaN() const; 
 	//TBD constexpr bool isexact() const { return (v&1) == 0; }
 
@@ -317,9 +328,13 @@ public:
 	static constexpr Posit inf() { return Posit(DeepInit(),PT::POSIT_PINF); }
 	static constexpr Posit pinf() { return Posit(DeepInit(),PT::POSIT_PINF); }
 	static constexpr Posit ninf() { return Posit(DeepInit(),PT::POSIT_NINF); }
+	static constexpr Posit max() { return Posit(DeepInit(),PT::POSIT_MAXPOS); }
+	static constexpr Posit min() { return Posit(DeepInit(),PT::POSIT_AFTER0); }
+	static constexpr Posit lowest() { return Posit(DeepInit(),PT::POSIT_MINNEG); }
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
 	static constexpr Posit nan() { return Posit(DeepInit(),PT::POSIT_NAN); }
+	static constexpr Posit infinity() { return Posit(DeepInit(),PT::POSIT_PINF); }
 	static constexpr Posit one() { return Posit(DeepInit(),PT::POSIT_ONE); }
 	static constexpr Posit two() { return Posit(DeepInit(),PT::POSIT_TWO); }
 	static constexpr Posit mone() { return Posit(DeepInit(),PT::POSIT_MONE); }
@@ -761,6 +776,55 @@ namespace std
 	{
 		return a >= b ? a : b;
 	}
+
+	template <class B,int totalbits, int esbits, class FT, bool withnan> class numeric_limits<Posit<B,totalbits,esbits,FT,withnan> > {
+	public:
+	  using T=Posit<B,totalbits,esbits,FT,withnan>;
+	  using PT=typename T::PT;
+	  static constexpr bool is_specialized = true;
+	  static constexpr T min() noexcept { return T::min(); }
+	  static constexpr T max() noexcept { return T::max(); }
+	  static constexpr T lowest() noexcept { return T::lowest	(); }
+	  //static constexpr int  digits = 0; number of digits (in radix base) in the mantissa 
+	  //static constexpr int  digits10 = 0;
+	  static constexpr bool is_signed = true;
+	  static constexpr bool is_integer = false;
+	  static constexpr bool is_exact = false;
+	  static constexpr int radix = 2;
+	  static constexpr T epsilon() noexcept { return T::one().next()-T::one(); }
+	  //static constexpr T round_error() noexcept { return T(); } m
+
+	  static constexpr int  min_exponent = PT::minexponent;
+	  // static constexpr int  min_exponent10 = 0;
+	  static constexpr int  max_exponent = PT::maxexponent;
+	  //static constexpr int  max_exponent10 = 0;
+
+	  static constexpr bool has_infinity = true;
+	  static constexpr bool has_quiet_NaN = withnan;
+	  static constexpr bool has_signaling_NaN = false;
+	  //static constexpr float_denorm_style has_denorm = denorm_absent;
+	  static constexpr bool has_denorm_loss = false;
+	  static constexpr T infinity() noexcept { return T::infinity(); }
+	  static constexpr T quiet_NaN() noexcept { return T::nan(); }
+	  //static constexpr T signaling_NaN() noexcept { return T(); }
+	  static constexpr T denorm_min() noexcept { return T::min(); }
+
+	  static constexpr bool is_iec559 = false;
+	  static constexpr bool is_bounded = false;
+	  static constexpr bool is_modulo = false;
+
+	  static constexpr bool traps = false;
+	  static constexpr bool tinyness_before = false;
+	  //static constexpr float_round_style round_style = round_toward_zero;
+	  /*
+	  round_toward_zero, if it rounds toward zero.
+round_to_nearest, if it rounds to the nearest representable value.
+round_toward_infinity, if it rounds toward infinity.
+round_toward_neg_infinity, if it rounds toward negative infinity.
+round_indeterminate, if the rounding style is indeterminable at compile time.
+*/
+	};
+
 }
 
 
