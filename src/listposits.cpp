@@ -259,7 +259,7 @@ int listpositsT(const char * format)
             std::cout << "infinity "  << (typename printableinttype<typename X::value_t>::type)(X::PT::POSIT_PINF) << " " << std::bitset<sizeof(typename X::value_t)*8>(X::PT::POSIT_PINF)  << std::endl;
         }
         std::cout   << " half=" << (double)X(X::PT::POSIT_HALF) << " twice=" <<  (double)X(X::PT::POSIT_TWO) <<std::endl;
-        std::cout   << " min=" << (double)X(X::PT::POSIT_MIN) << " " << (std::bitset<X::vtotalbits>(X::PT::POSIT_MIN)) <<  " max=" << X(X::PT::POSIT_MAX)  <<std::endl;
+        std::cout   << " min=" << (double)X(X::PT::POSIT_MINNEG) << " " << (std::bitset<X::vtotalbits>(X::PT::POSIT_MINNEG)) <<  " max=" << X(X::PT::POSIT_MAXPOS)  <<std::endl;
 
         /*
         {
@@ -289,7 +289,7 @@ int listpositsT(const char * format)
         }
         else
         {
-            std::cout << "looping signed " <<  std::dec <<  pt(X::PT::POSIT_MIN) << " to " <<  pt(X::PT::POSIT_MAX) << std::endl;
+            std::cout << "looping signed " <<  std::dec <<  pt(X::PT::POSIT_MINNEG) << " to " <<  pt(X::PT::POSIT_MAXPOS) << std::endl;
         }
     }
 
@@ -340,7 +340,7 @@ int listpositsT(const char * format)
     }
     else
     {
-        typename X::value_t i = X::PT::POSIT_MIN; 
+        typename X::value_t i = X::PT::POSIT_MINNEG; 
         do
     	{
             //typename X::value_t i = SIGNEX(j,X::vtotalbits-1);
@@ -379,7 +379,7 @@ int listpositsT(const char * format)
     		//else
     		//		std::cout << std::dec << std::setw(8) << i << " " << std::setw(X::vtotalbits+1) << (std::bitset<X::vtotalbits>(i)) << " " << std::setw(10) << (double)u  << " " << std::setw(8) << std::dec <<  xux.v << " " << std::setw(X::vtotalbits+1) << (std::bitset<X::vtotalbits>(xux.v)) << " " << (xux.v == i) << " " << (double)xux << " " << rs << " " << reg << std::endl;
             */
-    	} while (i++ < X::PT::POSIT_MAX);
+    	} while (i++ < X::PT::POSIT_MAXPOS);
     }
     ons << std::flush;
 	return 0;

@@ -61,8 +61,8 @@ public:
 	bool has_neg_exponent() const { return (v & 0x80) == 0; }
 	bool is_nan() const { return PT::withnan && v == PT::POSIT_NAN; }
 	bool is_infinity() const { return (v == PT::POSIT_PINF || v == PT::POSIT_NINF);}
-	static posit8 max() { return posit8(DeepInit(),PT::POSIT_MAX); } // 126 or 127
-	static posit8 min() { return posit8(DeepInit(),PT::POSIT_MIN); } //  ? -126 : -127
+	static posit8 max() { return posit8(DeepInit(),PT::POSIT_MAXPOS); } // 126 or 127
+	static posit8 min() { return posit8(DeepInit(),PT::POSIT_MINNEG); } //  ? -126 : -127
 	static posit8 one() { return posit8(DeepInit(),PT::POSIT_ONE); } // 0x40
 	static posit8 two() { return posit8(DeepInit(),72); }
 	static posit8 onehalf() { return posit8(DeepInit(),0x20); }

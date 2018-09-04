@@ -15,8 +15,10 @@ void test_numeric_limits () {
   std::cout << "Maximum value for T: " << std::numeric_limits<T>::max() <<" "<< (double) std::numeric_limits<T>::max()<< '\n';
   std::cout << "Lowest value for T: " << std::numeric_limits<T>::lowest() << " "<<(double) std::numeric_limits<T>::lowest()<< '\n';
   std::cout << "Epsilon for T: " << std::numeric_limits<T>::epsilon() << " "<<(double) std::numeric_limits<T>::epsilon()<< '\n';
+
   std::cout << "T is signed: " << std::numeric_limits<T>::is_signed << '\n';
-  std::cout << "then " << (T::one()+std::numeric_limits<T>::epsilon() ==  T::one().next()) << std::endl;
+  //std::cout << std::numeric_limits<T>::epsilon().v << std::endl;
+  //std::cout << "then " << (T::one()+std::numeric_limits<T>::epsilon() ==  T::one().next()) << std::endl;
   //std::cout << (double)(T::one().next())-(double)T::one() << std::endl;
   //std::cout << "Non-sign bits in T: " << std::numeric_limits<T>::digits << '\n';
   std::cout << "T has infinity: " << std::numeric_limits<T>::has_infinity << '\n';

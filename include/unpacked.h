@@ -1,6 +1,10 @@
 /**
- * Emanuele Ruffaldi (C) 2017
- * Templated C++ Posit
+ * Emanuele Ruffaldi (C) 2017-2018
+ *
+ * cppPosit project
+ * gneralized soft float in unpackd form
+
+ * 
  */
 #pragma once
 
@@ -187,7 +191,14 @@ struct Unpacked
     }
 
     CONSTEXPR14 Unpacked& operator+=(const Unpacked &a) { Unpacked r = *this+a; *this = r; return *this; }
+    CONSTEXPR14 Unpacked& operator-=(const Unpacked &a) { *this += (-a); return *this; }
 
+    CONSTEXPR14 friend Unpacked operator- ( Unpacked  a,  Unpacked  b) 
+    {
+        retun a+(-b);
+    }
+
+    // TODO overflow?
     CONSTEXPR14 friend Unpacked operator+ ( Unpacked  a,  Unpacked  b) 
     {
         // UnpackedDualSel(*,NaN)
@@ -242,7 +253,7 @@ struct Unpacked
 
     // https://www.edwardrosten.com/code/fp_template.html
     // https://github.com/Melown/half
-
+    // TODO overflow?
     CONSTEXPR14 friend Unpacked operator*(const Unpacked & a, const Unpacked & b) 
     {
         if(a.isNaN() || b.isNaN())
@@ -282,6 +293,7 @@ struct Unpacked
      * Division Truth Table
 
      */
+    // TODO overflow?
     CONSTEXPR14 friend Unpacked operator/ (const Unpacked & a, const Unpacked & b) 
     {
         if(a.isNaN() || b.isNaN())

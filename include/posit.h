@@ -264,7 +264,7 @@ public:
 
     CONSTEXPR14 explicit Posit(float f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(f)).v;  }
 	CONSTEXPR14 explicit Posit(double d) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(d)).v;  }
-	CONSTEXPR14 explicit Posit(int f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
+	CONSTEXPR14 explicit Posit(int f); // { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
 	CONSTEXPR14 explicit Posit(DeepInit, T x) : v(x) {} 
 	CONSTEXPR14 explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
 	CONSTEXPR14 explicit Posit(UnpackedLow u) : v(pack_low(u).v) {} 
@@ -411,6 +411,74 @@ public:
 	}
 
 };
+
+//template <class T,int totalbits, int esbits, class FT, bool withnan, class Trait>
+template <class T, int totalbits, int esbits, class FT, bool withnan>
+CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan>::Posit(int xvalue)
+{
+    using POSIT_UTYPE = typename PT::POSIT_UTYPE;
+    using POSIT_STYPE = typename PT::POSIT_STYPE;
+    using UT=Unpacked<FT,typename PT::exponenttype>;
+
+    if(xvalue == 0)
+    {
+    	v = 0;
+    }
+    else
+    {
+	    bool negativeSign = xvalue < 0;
+	    int value = xvalue < 0 ? -xvalue: xvalue;
+
+		auto exponentF = rawexp - Trait::exponent_bias; // ((un.u >> Trait::fraction_bits) & Trait::exponent_mask)
+	    auto fractionF = cast_right_to_left<typename Trait::holder_t,Trait::fraction_bits,FT,UT::POSIT_FRAC_TYPE_SIZE_BITS>()(value);
+
+		if(rawexp == ((1 << Trait::exponent_bits)-1))
+		{
+			if(fractionF == 0)
+			{
+				return PP(typename PP::DeepInit(),negativeSign ? PT::POSIT_NINF : PT::POSIT_PINF);
+			}
+			else
+			{
+				return PP(typename PP::DeepInit(),PT::POSIT_NAN);
+			}
+		}
+		else if (rawexp == 0)
+	    {
+	        if(fractionF == 0)
+	        {
+	            negativeSign = false;
+	            return PP::zero();
+	        }
+	        else
+	        {
+	            int k = findbitleftmostC(fractionF);
+
+	            exponentF -= k;
+	            fractionF <<= k+1; // plus normalization
+	        }	
+	   	}
+
+	    // Phase 3: compute low as regime (Unpacked_Low)
+
+		auto eexponent = clamp<decltype(exponentF)>(exponentF,PT::minexponent,PT::maxexponent); // no overflow
+		auto rr = PT::split_reg_exp(exponentF);
+		auto fraction = cast_msb<FT,sizeof(FT)*8,typename PT::POSIT_UTYPE,sizeof(typename PT::POSIT_UTYPE)*8>()(fractionF); 
+		auto reg = rr.first;
+		auto exp = rr.second;
+
+		// Phase 4: UnpackedLow to Posit
+
+	    auto rs = std::max(-reg + 1, reg + 2); 
+	    auto es = std::min((int)(totalbits-rs-1),(int)esbits);
+
+	    POSIT_UTYPE regbits = reg < 0 ? (PT::POSIT_HOLDER_MSB >> -reg) : (PT::POSIT_MASK << (PT::POSIT_HOLDER_SIZE-(reg+1))); // reg+1 bits on the left
+		POSIT_UTYPE eexp = msb_exp<POSIT_UTYPE,PT::POSIT_HOLDER_SIZE,esbits,(esbits == 00)>()(exp);
+		POSIT_STYPE p = ((fraction >> (rs+es+1)) | (eexp >> (rs+1)) | (regbits>>1)) >> (sizeof(PP)*8-totalbits);
+
+	    return PP(typename PP::DeepInit(),negativeSign ? -p : p);
+	}
+}
 
 template <class T, int totalbits, int esbits, class FT, bool withnan>
 std::ostream & operator << (std::ostream & ons, Posit<T,totalbits,esbits,FT,withnan> const & o)
@@ -711,6 +779,7 @@ auto Posit<T,totalbits,esbits,FT,withnan>::analyze() -> info
 }
 
 
+
 template <class T,int totalbits, int esbits, class FT, bool withnan>
 CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) -> typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT 
 {
@@ -792,8 +861,9 @@ namespace std
 	  static constexpr bool is_exact = false;
 	  static constexpr int radix = 2;
 	  static constexpr T epsilon() noexcept { return T::one().next()-T::one(); }
-	  //static constexpr T round_error() noexcept { return T(); } m
+	  //static constexpr T round_error() noexcept { return T(); } 
 
+	  // this is also the maximum integer
 	  static constexpr int  min_exponent = PT::minexponent;
 	  // static constexpr int  min_exponent10 = 0;
 	  static constexpr int  max_exponent = PT::maxexponent;

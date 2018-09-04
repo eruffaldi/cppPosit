@@ -91,7 +91,7 @@ int main(int argc, char const *argv[]) {
     std::cout << "Configuration " << std::hex << " MSB = " << X::PT::POSIT_MSB << " Mask=" << X::PT::POSIT_MASK
               << " Sign=" << X::PT::POSIT_SIGNBIT << " one=" << X::PT::POSIT_ONE << " inf=" << X::PT::POSIT_PINF
               << " half=" << (double)X(X::PT::POSIT_HALF) << " twice=" <<  (double)X(X::PT::POSIT_TWO) 
-              << " min=" << (double)X(X::PT::POSIT_MIN) << " max=" << X(X::PT::POSIT_MAX) 
+              << " min=" << (double)X(X::PT::POSIT_MINNEG) << " max=" << X(X::PT::POSIT_MAXPOS) 
               << " maxexponent " << X::PT::maxexponent << std::dec << std::endl;
     if(false)
     {
