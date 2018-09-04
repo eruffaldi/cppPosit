@@ -264,7 +264,7 @@ public:
 
     CONSTEXPR14 explicit Posit(float f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(f)).v;  }
 	CONSTEXPR14 explicit Posit(double d) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(d)).v;  }
-	CONSTEXPR14 explicit Posit(int f); // { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
+	CONSTEXPR14 explicit Posit(int f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
 	CONSTEXPR14 explicit Posit(DeepInit, T x) : v(x) {} 
 	CONSTEXPR14 explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
 	CONSTEXPR14 explicit Posit(UnpackedLow u) : v(pack_low(u).v) {} 
@@ -412,10 +412,12 @@ public:
 
 };
 
+#if 0
 //template <class T,int totalbits, int esbits, class FT, bool withnan, class Trait>
 template <class T, int totalbits, int esbits, class FT, bool withnan>
 CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan>::Posit(int xvalue)
 {
+	using Trait=PT;
     using POSIT_UTYPE = typename PT::POSIT_UTYPE;
     using POSIT_STYPE = typename PT::POSIT_STYPE;
     using UT=Unpacked<FT,typename PT::exponenttype>;
@@ -479,7 +481,7 @@ CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan>::Posit(int xvalue)
 	    return PP(typename PP::DeepInit(),negativeSign ? -p : p);
 	}
 }
-
+#endif
 template <class T, int totalbits, int esbits, class FT, bool withnan>
 std::ostream & operator << (std::ostream & ons, Posit<T,totalbits,esbits,FT,withnan> const & o)
 {

@@ -185,18 +185,13 @@ struct Unpacked
         unpack_xfloati<Trait>(uu.i);
     }
 
-    constexpr friend Unpacked operator - (Unpacked a, Unpacked b)
+    CONSTEXPR14 constexpr friend Unpacked operator - (Unpacked a, Unpacked b)
     {
         return a+(-b);
     }
 
     CONSTEXPR14 Unpacked& operator+=(const Unpacked &a) { Unpacked r = *this+a; *this = r; return *this; }
     CONSTEXPR14 Unpacked& operator-=(const Unpacked &a) { *this += (-a); return *this; }
-
-    CONSTEXPR14 friend Unpacked operator- ( Unpacked  a,  Unpacked  b) 
-    {
-        retun a+(-b);
-    }
 
     // TODO overflow?
     CONSTEXPR14 friend Unpacked operator+ ( Unpacked  a,  Unpacked  b) 
