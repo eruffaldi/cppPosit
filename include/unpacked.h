@@ -185,7 +185,7 @@ struct Unpacked
         unpack_xfloati<Trait>(uu.i);
     }
 
-    CONSTEXPR14 constexpr friend Unpacked operator - (Unpacked a, Unpacked b)
+    CONSTEXPR14 friend Unpacked operator - (Unpacked a, Unpacked b)
     {
         return a+(-b);
     }
