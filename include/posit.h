@@ -34,66 +34,64 @@ struct PositTrait
 	static constexpr bool withnan = withnan_;
 	using exponenttype = typename std::conditional<(totalbits+esbits >= sizeof(T)*8),typename  nextinttype<T>::type,T>::type;
 
-	enum : POSIT_UTYPE {
-		POSIT_MAXREGIME_BITS = totalbits-1,
-		POIST_ONEHELPER = 1,
-		POSIT_HOLDER_SIZE = sizeof(T)*8, 
-		POSIT_SIZE = totalbits,
-		POSIT_ESP_SIZE = esbits,
-		POSIT_MSB = POIST_ONEHELPER<<(totalbits-1),
-		POSIT_HOLDER_MSB = POIST_ONEHELPER<<(POSIT_HOLDER_SIZE-1),
-        POSIT_MASK = ((POSIT_MSB-1)|(POSIT_MSB)),
-        POSIT_ESP_MASK = (POIST_ONEHELPER<< esbits)-1,
+	//enum : POSIT_UTYPE {
+		static constexpr POSIT_UTYPE POSIT_MAXREGIME_BITS = totalbits-1;
+		static constexpr POSIT_UTYPE POIST_ONEHELPER = 1;
+		static constexpr POSIT_UTYPE POSIT_HOLDER_SIZE = sizeof(T)*8;
+		static constexpr POSIT_UTYPE POSIT_SIZE = totalbits;
+		static constexpr POSIT_UTYPE POSIT_ESP_SIZE = esbits;
+		static constexpr POSIT_UTYPE POSIT_MSB = POIST_ONEHELPER<<(totalbits-1);
+		static constexpr POSIT_UTYPE POSIT_HOLDER_MSB = POIST_ONEHELPER<<(POSIT_HOLDER_SIZE-1);
+        static constexpr POSIT_UTYPE POSIT_MASK = ((POSIT_MSB-1)|(POSIT_MSB));
+        static constexpr POSIT_UTYPE POSIT_ESP_MASK = (POIST_ONEHELPER<< esbits)-1;
         //POSIT_HOLDER_MSB = 1U<<(POSIT_HOLDER_SIZE-1),
         //POSIT_HOLDER_MASK = ((POSIT_HOLDER_SIZE-1)|(POSIT_HOLDER_SIZE)),
-		POSIT_EXTRA_BITS = POSIT_HOLDER_SIZE-POSIT_SIZE,
-		POSIT_SIGNBIT = (POIST_ONEHELPER<<(POSIT_SIZE-1)), // bit
-		POSIT_INVERTBIT = (POIST_ONEHELPER<<(POSIT_SIZE-2)),
+		static constexpr POSIT_UTYPE POSIT_EXTRA_BITS = POSIT_HOLDER_SIZE-POSIT_SIZE;
+		static constexpr POSIT_UTYPE POSIT_SIGNBIT = (POIST_ONEHELPER<<(POSIT_SIZE-1)); // bit
+		static constexpr POSIT_UTYPE POSIT_INVERTBIT = (POIST_ONEHELPER<<(POSIT_SIZE-2));
 
-	};
-	enum : POSIT_STYPE {
-		POSIT_REG_SCALE = 1<<esbits,
+		static constexpr POSIT_STYPE POSIT_REG_SCALE = 1<<esbits;
 
 		// these are portable ways for representing 10000000 and the two adjacents numbers in 
 		// the posit circle
-		_POSIT_TOP = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1))),
-		_POSIT_TOPRIGHT = (POSIT_STYPE)((POIST_ONEHELPER<< (totalbits-1))-1),
-		_POSIT_TOPLEFT = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1)))+1,
+		static constexpr POSIT_STYPE _POSIT_TOP = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1)));
+		static constexpr POSIT_STYPE _POSIT_TOPRIGHT = (POSIT_STYPE)((POIST_ONEHELPER<< (totalbits-1))-1);
+		static constexpr POSIT_STYPE _POSIT_TOPLEFT = (POSIT_STYPE)((POSIT_UTYPE(~0) << (totalbits-1)))+1;
 
 		// Without Nan (classic Posit): there only one Infinity
 		// With NaN: the top element is NaN and then its adjacents correspond to +- Infinity
-		POSIT_PINF =  withnan_ ? _POSIT_TOPRIGHT: _POSIT_TOP , // 1[sign] 000000 or N-1 111 bits
-		POSIT_NINF =  withnan_ ? _POSIT_TOPLEFT: _POSIT_TOP,
-		POSIT_NAN  = _POSIT_TOP,  // infinity in withnan=false otherwise it is truly nan
-		POSIT_ONE =  POSIT_INVERTBIT, // fine due to position of invert bit
-		POSIT_MONE = -POSIT_ONE , // minus one
+		static constexpr POSIT_STYPE POSIT_PINF =  withnan_ ? _POSIT_TOPRIGHT: _POSIT_TOP ; // 1[sign] 000000 or N-1 111 bits
+		static constexpr POSIT_STYPE POSIT_NINF =  withnan_ ? _POSIT_TOPLEFT: _POSIT_TOP;
+		static constexpr POSIT_STYPE POSIT_NAN  = _POSIT_TOP;  // infinity in withnan=false otherwise it is truly nan
+		static constexpr POSIT_STYPE POSIT_ONE =  POSIT_INVERTBIT; // fine due to position of invert bit
+		static constexpr POSIT_STYPE POSIT_MONE = -POSIT_ONE ; // minus one
 
 		// Two
-		POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>(1+esbits))),
+		static constexpr POSIT_STYPE POSIT_TWO = (POSIT_INVERTBIT | (POSIT_INVERTBIT>>(1+esbits)));
 
 		// 1/2
 		// 00 1[esbits+1] 0[N-2-esbitis-1]
-		POSIT_HALF = POSIT_STYPE( (POSIT_UTYPE(-1) >> (totalbits-esbits-1))) << (totalbits-3-esbits),
+		static constexpr POSIT_STYPE POSIT_HALF = POSIT_STYPE( (POSIT_UTYPE(-1) >> (totalbits-esbits-1))) << (totalbits-3-esbits);
 		
 		// max value below Infinity
 		// 1[holder-total] 1 0[total-1]
-		POSIT_MAXPOS = _POSIT_TOPRIGHT - (withnan_ ? 1:0),
+		static constexpr POSIT_STYPE POSIT_MAXPOS = _POSIT_TOPRIGHT - (withnan_ ? 1:0);
 
 		// min value above -Infinity
 		// 0[holder-total] 0 1[total-1]
-		POSIT_MINNEG = _POSIT_TOPLEFT + (withnan_? 1:0),
+		static constexpr POSIT_STYPE POSIT_MINNEG = _POSIT_TOPLEFT + (withnan_? 1:0);
 
 		// minimal number above zero
-		POSIT_AFTER0 = 1, // right to 0
-		POSIT_BEFORE0 = -POSIT_AFTER0, // left to 0
+		static constexpr POSIT_STYPE POSIT_AFTER0 = 1; // right to 0
+		static constexpr POSIT_STYPE POSIT_BEFORE0 = -POSIT_AFTER0; // left to 0
 
-	};
+		//static constexpr exponenttype maxexponent = withnan_ ? POSIT_REG_SCALE * (POSIT_SIZE - 3) : POSIT_REG_SCALE * (POSIT_SIZE - 2);  // sign+1st rs
+		//static constexpr exponenttype minexponent = (-((exponenttype)POSIT_REG_SCALE) * (POSIT_SIZE - 2))  // sign+1st rs
 
-	enum: exponenttype { 
-		maxexponent = withnan_ ? POSIT_REG_SCALE * (POSIT_SIZE - 3) : POSIT_REG_SCALE * (POSIT_SIZE - 2),  // sign+1st rs
-		minexponent = (-((exponenttype)POSIT_REG_SCALE) * (POSIT_SIZE - 2))  // sign+1st rs
-	};
-
+		static constexpr exponenttype maxexponent() { return withnan_ ? POSIT_REG_SCALE * (POSIT_SIZE - 3) : POSIT_REG_SCALE * (POSIT_SIZE - 2); }
+		static constexpr exponenttype minexponent() { return (-((exponenttype)POSIT_REG_SCALE) * (POSIT_SIZE - 2)) ; }
+	//enum : exponenttype{
+	//};
     //static constexpr POSIT_UTYPE LMASK(POSIT_UTYPE bits, POSIT_UTYPE size)
     //{ return ((bits) & (POSIT_MASK << (POSIT_SIZE - (size)))); }
 
@@ -151,6 +149,9 @@ struct PositTrait
     	return (((exponenttype)reg) * (1<<POSIT_ESP_SIZE))|exp;
     }
 };
+
+//template <class T, int totalbits, int esbits, bool withnan_ >
+//constexpr typename PositTrait<T,totalbits,esbits,withnan_>::exponenttype PositTrait<T,totalbits,esbits,withnan_>::minexponent;
 
 template <class T,int totalbits, int esbits, class FT, bool withnan>
 class Posit;
@@ -708,7 +709,7 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_full2low(Unpacke
 {
 	if(x.type == UnpackedT::Regular)
 	{
-		auto eexponent = clamp<decltype(x.exponent)>(x.exponent,PT::minexponent,PT::maxexponent); // no overflow
+		auto eexponent = clamp<decltype(x.exponent)>(x.exponent,PT::minexponent(),PT::maxexponent()); // no overflow
 		auto rr = PT::split_reg_exp(eexponent);
 		auto frac = cast_msb<FT,sizeof(FT)*8,typename PT::POSIT_UTYPE,sizeof(typename PT::POSIT_UTYPE)*8>()(x.fraction);
 		return UnpackedLow(x.negativeSign,rr.first,rr.second,frac);
@@ -866,9 +867,9 @@ namespace std
 	  //static constexpr T round_error() noexcept { return T(); } 
 
 	  // this is also the maximum integer
-	  static constexpr int  min_exponent = PT::minexponent;
+	  static constexpr int  min_exponent = PT::minexponent();
 	  // static constexpr int  min_exponent10 = 0;
-	  static constexpr int  max_exponent = PT::maxexponent;
+	  static constexpr int  max_exponent = PT::maxexponent();
 	  //static constexpr int  max_exponent10 = 0;
 
 	  static constexpr bool has_infinity = true;

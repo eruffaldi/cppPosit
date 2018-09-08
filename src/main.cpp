@@ -92,7 +92,7 @@ int main(int argc, char const *argv[]) {
               << " Sign=" << X::PT::POSIT_SIGNBIT << " one=" << X::PT::POSIT_ONE << " inf=" << X::PT::POSIT_PINF
               << " half=" << (double)X(X::PT::POSIT_HALF) << " twice=" <<  (double)X(X::PT::POSIT_TWO) 
               << " min=" << (double)X(X::PT::POSIT_MINNEG) << " max=" << X(X::PT::POSIT_MAXPOS) 
-              << " maxexponent " << X::PT::maxexponent << std::dec << std::endl;
+              << " maxexponent " << X::PT::maxexponent() << std::dec << std::endl;
     if(false)
     {
             float values[] = {1, 2, INFINITY, NAN, 0, 4.0, 10.0, -1.0, -2.0, -4.0, -10.0, 1 / 2.0, 1 / 4.0};
@@ -111,10 +111,10 @@ int main(int argc, char const *argv[]) {
         std::cout << "TESTING UNPACKED\n";
         // now check the unpack
         checkup<TQ,TI>(X::UnpackedT(40,0,true));
-        checkup<TQ,TI>(X::UnpackedT(X::PT::maxexponent,0,true));
-        checkup<TQ,TI>(X::UnpackedT(-X::PT::maxexponent,0,true));
-        checkup<TQ,TI>(X::UnpackedT(X::PT::maxexponent,0,false));
-        checkup<TQ,TI>(X::UnpackedT(-X::PT::maxexponent,0,false));
+        checkup<TQ,TI>(X::UnpackedT(X::PT::maxexponent(),0,true));
+        checkup<TQ,TI>(X::UnpackedT(-X::PT::maxexponent(),0,true));
+        checkup<TQ,TI>(X::UnpackedT(X::PT::maxexponent(),0,false));
+        checkup<TQ,TI>(X::UnpackedT(-X::PT::maxexponent(),0,false));
         }
 
     X::UnpackedT yu(0.3f);

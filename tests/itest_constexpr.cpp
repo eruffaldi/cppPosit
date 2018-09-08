@@ -20,6 +20,8 @@ int main()
 	static_assert(X1::one().twice() == X1::two(),"same 2==1*1+1 using fma");
 	static_assert(X1::two() == X1::one()*X1::one()+X1::one(),"same 2==1*1+1 using fma");
 
+	static_assert(X1::PT::minexponent() < X1::PT::maxexponent() ,"exponent ordering");
+
 	pp(X1(2));
 	pp(X1::two());
 	pp(X1::one()+X1::one());
