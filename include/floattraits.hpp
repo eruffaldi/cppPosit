@@ -7,9 +7,52 @@ struct halffloat
     uint16_t what;
 };
 
+struct halffloatalt
+{
+    uint16_t what;
+};
+
+struct microfloat
+{
+    uint8_t what;
+};
+
+
+/// holder_T is an unsigned integer capable of storing 1+exp_bits+frac_bits exactly
+/// value_T  is the struct or native type used for this 
+template <int exp_bits, int frac_bits, class value_T, class holder_T>
+struct any_floattrait
+{
+    using value_t = value_T;
+    using holder_t = holder_T;
+
+    static constexpr int data_bits = exp_bits+frac_bits+1;
+    static constexpr int exponent_bits =  exp_bits;
+	static constexpr int fraction_bits = frac_bits;
+	static constexpr int exponent_bias = (1<<(exp_bits-1))-1; 
+    static constexpr int exponent_max =  (1<<(exp_bits))-2; 
+    static constexpr holder_t signbit = ((holder_t)(1))<<(data_bits-1);
+    static constexpr uint32_t exponent_mask = (1<<exponent_bits)-1;
+
+    static constexpr holder_t ninfinity_h = signbit | 0xFC00; // 1 1[e] 0...
+    static constexpr holder_t pinfinity_h = 0x7C00; // 0 1[e] 0...
+    static constexpr holder_t nan_h = 0x7E00; // 0 1[e] 1 0...
+    static constexpr holder_t one_h = 0x3C00; // 0 0 1[e-1] 0...
+    static constexpr holder_t two_h = 0x4000; // 0 1 0...
+};
+
+struct microfloat_trait : public any_floattrait<8,5,microfloat,uint8_t>
+{
+};
+
+
+// PULP 8E,7M vs classic 5E,10P
+struct half_traitalt : public any_floattrait<8,7,halffloatalt,uint16_t>
+{
+};
 
 // https://en.wikipedia.org/wiki/16-bit
-struct half_trait
+struct half_trait : public any_floattrait<15,10,halffloat,uint16_t>
 {
     using value_t = halffloat;
     using holder_t = uint16_t;
@@ -99,6 +142,7 @@ struct double128_trait
 
 #endif
 
+
 template <class T>
 struct float2trait
 {};
@@ -116,3 +160,68 @@ struct float2trait<double>
 	using type = double;
 	using trait = double_trait;
 };
+#if 0
+
+template <class Trait>
+struct limithelper
+{
+	using T=Trait;
+	  static constexpr bool is_specialized = true;
+	  static constexpr T min() noexcept { return T::min(); }
+	  static constexpr T max() noexcept { return T::max(); }
+	  static constexpr T lowest() noexcept { return T::lowest	(); }
+	  //static constexpr int  digits = 0; number of digits (in radix base) in the mantissa 
+	  //static constexpr int  digits10 = 0;
+	  static constexpr bool is_signed = true;
+	  static constexpr bool is_integer = false;
+	  static constexpr bool is_exact = false;
+	  static constexpr int radix = 2;
+	  static constexpr T epsilon() noexcept { return T::one().next()-T::one(); }
+	  //static constexpr T round_error() noexcept { return T(); } 
+
+	  // this is also the maximum integer
+	  static constexpr int  min_exponent = PT::minexponent();
+	  // static constexpr int  min_exponent10 = 0;
+	  static constexpr int  max_exponent = PT::maxexponent();
+	  //static constexpr int  max_exponent10 = 0;
+
+	  static constexpr bool has_infinity = true;
+	  static constexpr bool has_quiet_NaN = withnan;
+	  static constexpr bool has_signaling_NaN = false;
+	  //static constexpr float_denorm_style has_denorm = denorm_absent;
+	  static constexpr bool has_denorm_loss = false;
+	  static constexpr T infinity() noexcept { return T::infinity(); }
+	  static constexpr T quiet_NaN() noexcept { return T::nan(); }
+	  //static constexpr T signaling_NaN() noexcept { return T(); }
+	  static constexpr T denorm_min() noexcept { return T::min(); }
+
+	  static constexpr bool is_iec559 = false;
+	  static constexpr bool is_bounded = false;
+	  static constexpr bool is_modulo = false;
+
+	  static constexpr bool traps = false;
+	  static constexpr bool tinyness_before = false;
+};
+
+namespace std
+{
+	template <>
+	struct limits<halffloat>: public limithelper<half_trait>
+	{
+
+	};
+
+	template <>
+	struct limits<halffloatalt>: public limithelper<half_traitalt>
+	{
+
+	};
+
+	template <>
+	struct limits<microfloat>: public limithelper<microfloat_trait>
+	{
+
+	};
+
+}
+#endif

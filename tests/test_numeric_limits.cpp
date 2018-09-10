@@ -3,6 +3,8 @@
 #include <iostream>     // std::cout
 #include <limits>       // std::numeric_limits
 
+#define xstr(s) str(s)
+#define str(s) #s
 #ifndef XBT
 	#define XBT Posit<int32_t,32,1,uint64_t,true>
 #endif
@@ -10,6 +12,7 @@
 void test_numeric_limits () {
   using T=XBT;
   std::cout << std::boolalpha;
+  std::cout << "\n\nMacro: " << xstr((XBT)) << std::endl;
   std::cout << "Signature: " << typeid(T).name() << std::endl;
   std::cout << "Minimum value for T: " << std::numeric_limits<T>::min() <<" "<< (double)  std::numeric_limits<T>::min()  << '\n';
   std::cout << "Maximum value for T: " << std::numeric_limits<T>::max() <<" "<< (double) std::numeric_limits<T>::max()<< '\n';
