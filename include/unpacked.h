@@ -89,10 +89,14 @@ struct Unpacked
 	constexpr operator float () const { return  pack_xfloat<single_trait>(); }
 	constexpr operator double () const { return  pack_xfloat<double_trait>(); }
     constexpr operator halffloat() const { return  pack_xfloat<half_trait>(); }
+    constexpr operator int() const { return  pack_int(); }
 
 	template <class Trait>
 	CONSTEXPR14 typename Trait::holder_t
 	pack_xfloati() const;
+
+    CONSTEXPR14 int
+    pack_int() const;
 
     template <class Trait>
     typename Trait::value_t
@@ -237,9 +241,11 @@ struct Unpacked
             case UnpackedDualSel(Regular,Zero):
             case UnpackedDualSel(Zero,Zero):
             case UnpackedDualSel(Infinity,Zero):
+            case UnpackedDualSel(Infinity,Regular):
                 return a;
             case UnpackedDualSel(Zero,Regular):
             case UnpackedDualSel(Zero,Infinity):
+            case UnpackedDualSel(Regular,Infinity):
                 return b;
             default: // case UnpackedDualSel(Infinity,Infinity):
                 return (a.negativeSign == b.negativeSign)? a : nan();
@@ -440,6 +446,86 @@ struct fraction_bit_extract<abits,AT,bbits,BT,false,msb>
         return ((BT)fraction) << (bbits-abits);
     }
 };
+
+
+template <class FT,class ET>
+CONSTEXPR14 int Unpacked<FT,ET>::pack_int() const
+{
+    #if 0
+    // TODO: decide for Infinity and NaN
+    // i32_fromNegOverflow
+    // i32_fromPosOverflow
+    // 
+    switch(type)
+    {
+        case Infinity:
+            return 0;
+        case Zero:
+            return 0;
+        case NaN:
+            return 0;
+        default:
+            break;
+    }
+
+    largest_type<ET,typename int_least_bits<16>::type > fexp = exponent;
+
+    /*
+    roundIncrement softfloat_round_near_maxMag
+                   softfloat_round_near_even
+                   softfloat_round_odd
+                   softfloat_round_min
+                   softfloat_round_max
+
+    if ( exp ) sig |= 0x00800000;
+    sig64 = (uint_fast64_t) sig<<32;
+    shiftDist = 0xAA - exp;
+    if ( 0 < shiftDist ) sig64 = softfloat_shiftRightJam64( sig64, shiftDist );
+    softfloat_roundToI32( sign, sig64, roundingMode, exact ) from
+
+    roundBits = sig & 0xFFF;
+    sig += roundIncrement;
+    if ( sig & UINT64_C( 0xFFFFF00000000000 ) ) goto invalid;
+    sig32 = sig>>12;
+    if (
+        (roundBits == 0x800) && (roundingMode == softfloat_round_near_even)
+    ) {
+        sig32 &= ~(uint_fast32_t) 1;
+    }
+
+    */
+    // left aligned
+    typename Trait::holder_t fexpbits = 0;
+    typename Trait::holder_t ffracbits = 0;
+
+    if (fexp > Trait::exponent_max) // AKA 254 for single
+    {
+        // overflow, set maximum value
+        fexpbits = ((typename Trait::holder_t)Trait::exponent_max) << (Trait::fraction_bits); // AKA 254 and 23
+        ffracbits = -1;
+    }
+    else if (fexp < 1) {
+        // fraction is stored POSIT_FRAC_TYPE_SIZE_BITS and we need to
+        // underflow, pack as denormal
+        if (fraction != 0) {
+            // shrink expand fractional part with 1. as denormal
+            ffracbits = fraction_bit_extract<POSIT_FRAC_TYPE_SIZE_BITS,FT,Trait::fraction_bits,typename Trait::holder_t,(POSIT_FRAC_TYPE_SIZE_BITS > Trait::fraction_bits),POSIT_FRAC_TYPE_MSB>::packdenorm(fraction);
+            // use denormalization
+            ffracbits >>= -fexp;
+        }
+    }
+    else
+    {
+        fexpbits = ((typename Trait::holder_t)(fexp & Trait::exponent_mask)) << (Trait::fraction_bits); // AKA 0xFF and 23 for single
+        ffracbits = fraction_bit_extract<POSIT_FRAC_TYPE_SIZE_BITS,FT,Trait::fraction_bits,typename Trait::holder_t,(POSIT_FRAC_TYPE_SIZE_BITS > Trait::fraction_bits),POSIT_FRAC_TYPE_MSB>::pack(fraction);
+    }
+
+    int value = ffracbits|fexpbits;
+    return negativeSign ? -value : value;
+    #else
+    return 0;
+    #endif
+}
 
 template <class FT,class ET>
 template <class Trait>

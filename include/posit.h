@@ -162,6 +162,28 @@ CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) ->
 template <class T,int totalbits, int esbits, class FT, bool withnan>
 CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan> pack_posit(const typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT & x);
 
+
+/**
+ * Minimal Unpacked representaiton of the Posit
+ * UT is UnpackedT
+ * PT is the Trait
+ */
+template <class UT, class PT>
+struct UnpackedLow_t
+{
+	using Type = typename UT::Type;
+
+	constexpr UnpackedLow_t(Type t): type(t) {}
+	constexpr UnpackedLow_t(Type t, bool anegativeSign): type(t), negativeSign(anegativeSign) {}
+	constexpr UnpackedLow_t(bool n, typename PT::POSIT_STYPE r, typename PT::POSIT_UTYPE e, typename PT::POSIT_UTYPE f):
+		 type(UT::Regular),negativeSign(n), regime(r), exp(e), fraction(f) {}
+
+	Type type;
+	bool negativeSign; // for Regular and Infinity if applicabl
+	typename PT::POSIT_STYPE regime; // decoded with sign
+	typename PT::POSIT_UTYPE exp;    // decoded
+	typename PT::POSIT_UTYPE fraction; // fraction left aligned without 1.
+};
 /**
  * Stores the data in the MSB totalbits of T
  * Uses esbits bits
@@ -186,6 +208,7 @@ public:
     using value_t=T;
     using fraction_t=FT;
     using UnpackedT=Unpacked<FT,typename PT::exponenttype>;
+    using UnpackedLow = UnpackedLow_t<UnpackedT,PT>;
 	using exponenttype = typename PT::exponenttype;
 	T v; // index in the N2 space
 
@@ -201,31 +224,14 @@ public:
 		// -
 	};
 
-	/**
-	 * Minimal Unpacked representaiton of the Posit
-	 */
-	struct UnpackedLow
-	{
-		using Type = typename UnpackedT::Type;
 
-		constexpr UnpackedLow(Type t): type(t) {}
-		constexpr UnpackedLow(Type t, bool anegativeSign): type(t), negativeSign(anegativeSign) {}
-		constexpr UnpackedLow(bool n, typename PT::POSIT_STYPE r, typename PT::POSIT_UTYPE e, typename PT::POSIT_UTYPE f):
-			 type(UnpackedT::Regular),negativeSign(n), regime(r), exp(e), fraction(f) {}
-
-		Type type;
-		bool negativeSign; // for Regular and Infinity if applicabl
-		typename PT::POSIT_STYPE regime; // decoded with sign
-		typename PT::POSIT_UTYPE exp;    // decoded
-		typename PT::POSIT_UTYPE fraction; // fraction left aligned
-	};
 
 	CONSTEXPR14 Posit half() const;
 	CONSTEXPR14 Posit twice() const;
 	CONSTEXPR14 UnpackedLow unpack_low() const;
 	static CONSTEXPR14 Posit pack_low(UnpackedLow);
 	static CONSTEXPR14 UnpackedT unpacked_low2full(UnpackedLow x);
-	static CONSTEXPR14 UnpackedLow unpacked_full2low(UnpackedT x);
+	static CONSTEXPR14 UnpackedLow unpacked_full2low(UnpackedT tx);
 
 
 	/// diagnostics with full details
@@ -381,6 +387,7 @@ public:
 	constexpr operator float() const { return unpack(); }
 	constexpr operator double() const { return unpack(); }
 	constexpr operator UnpackedT() const { return unpack(); }
+	constexpr operator int() const { return unpack(); }
 
 	/// 1/(exp(-x)+1)
 	/// TODO: infintity check + __round of result

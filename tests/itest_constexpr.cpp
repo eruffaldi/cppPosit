@@ -27,3 +27,8 @@ int main()
 	pp(X1::one()+X1::one());
 	return 1;
 }
+
+void itest_constexpr()
+{
+	return main();
+}
