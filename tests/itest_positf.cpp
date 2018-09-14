@@ -3,7 +3,7 @@
 
 int main()
 {
-	using XF=PositF<int32_t,8,1,double,true>;
+	using XF=Posit<int32_t,8,3,double,true>;
 	using X=XF::PPT;
 
 	XF af0(XF::DeepInit(),50);
@@ -16,8 +16,10 @@ int main()
 		auto ri = ai+ai0;
 		if(rf.v != ri.v)
 		{
-			std::cout << rf << " != " << ri << " from " << af << " " << ai << " + " << (double)ai0 << std::endl;
+			std::cout << "!" << rf << " != " << ri << " from " << af << " " << ai << " + " << (double)ai0 << std::endl;
 		}
+		else
+			std::cout << (double)af << "+" << (double)af0 << " == " << (double)rf <<  std::endl;
 	}
 }
 

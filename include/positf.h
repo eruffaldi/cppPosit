@@ -178,6 +178,21 @@ public:
 
 };
 
+template <class T,int totalbits, int esbits, bool withnan>
+class Posit<T,totalbits,esbits,float,withnan>: public PositF<T,totalbits,esbits,float,withnan> 
+{
+public:
+	using PositF<T,totalbits,esbits,float,withnan>::PositF;
+};
+
+template <class T,int totalbits, int esbits, bool withnan>
+class Posit<T,totalbits,esbits,double,withnan>: public PositF<T,totalbits,esbits,float,withnan>
+{
+public:
+	using PositF<T,totalbits,esbits,float,withnan>::PositF;
+};
+
+
 template <class T, int totalbits, int esbits, class FFT, bool withnan>
 std::ostream & operator << (std::ostream & ons, PositF<T,totalbits,esbits,FFT,withnan> const & o)
 {

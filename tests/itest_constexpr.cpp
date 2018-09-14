@@ -22,6 +22,8 @@ int main()
 
 	static_assert(X1::PT::minexponent() < X1::PT::maxexponent() ,"exponent ordering");
 
+	static_assert(X1(1) == X1::one(),"same 1==1");
+
 	pp(X1(2));
 	pp(X1::two());
 	pp(X1::one()+X1::one());

@@ -1,5 +1,6 @@
 // cling -DXBT=float --std=c++14 -I../include test_numeric_limits.cpp
-#include "posit.h"     // std::cout
+// cling "-DXBT=PositF<int32_t,32,1,double,true> --std=c++14 -I../include test_numeric_limits.cpp
+#include "positf.h"     // std::cout
 #include <iostream>     // std::cout
 #include <limits>       // std::numeric_limits
 
