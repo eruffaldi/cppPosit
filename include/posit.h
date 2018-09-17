@@ -224,8 +224,6 @@ public:
 		// -
 	};
 
-
-
 	CONSTEXPR14 Posit half() const;
 	CONSTEXPR14 Posit twice() const;
 	CONSTEXPR14 UnpackedLow unpack_low() const;
@@ -255,9 +253,6 @@ public:
 	info analyze();
 
 
-	Posit() {}
-
-
 
     friend constexpr bool operator == (const Posit & a, const Posit & u)  { return a.v == u.v; }
     friend constexpr bool operator != (const Posit & a, const Posit & u)  { return a.v != u.v; }
@@ -269,17 +264,32 @@ public:
 
     static constexpr Posit ldexp(const Posit & u, int exp); // exponent product
 
-    CONSTEXPR14 explicit Posit(float f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(f)).v;  }
-	CONSTEXPR14 explicit Posit(double d) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(d)).v;  }
-	CONSTEXPR14 explicit Posit(int f) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT((double)f)).v; }
+	Posit() {}
+
+    /// construct passing the holding type x
 	CONSTEXPR14 explicit Posit(DeepInit, T x) : v(x) {} 
-	CONSTEXPR14 explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
+
+	/// construct from decomposed (s, R,E,F)
 	CONSTEXPR14 explicit Posit(UnpackedLow u) : v(pack_low(u).v) {} 
+
+	/// construct from fully unpacked floating (s,e,F)
+	CONSTEXPR14 explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
+
+    CONSTEXPR14 explicit Posit(float f): Posit(UnpackedT(f)) {}
+	CONSTEXPR14 explicit Posit(double d): Posit(UnpackedT(d)) {}
+	CONSTEXPR14 explicit Posit(int i): Posit(UnpackedT(i)) {}
 
 	constexpr UnpackedT unpack() const { return unpack_posit<T,totalbits,esbits,FT,withnan>(*this); }
 
-	constexpr Posit abs()  const { return Posit(DeepInit(),(v < 0 ? -v : v));  }  // could be >= infinity because infinity is sign symmetric
+	/// absolute value
+	/// TODO: use (v ^ mask) - mask   OR (x+mask)^nasj
+	/// where int const mask = v >> sizeof(int) * CHAR_BIT - 1;
+	constexpr Posit abs()  const { return Posit(DeepInit(),pabs(v));  }  // could be >= infinity because infinity is sign symmetric
+
+	/// negation
 	constexpr Posit neg()  const { return Posit(DeepInit(),-v); }; 
+
+	/// 1/x
 	CONSTEXPR14 Posit inv()  const;
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
@@ -384,9 +394,9 @@ public:
 	// conversion
 
 	// max
+	constexpr operator UnpackedT() const { return unpack(); }
 	constexpr operator float() const { return unpack(); }
 	constexpr operator double() const { return unpack(); }
-	constexpr operator UnpackedT() const { return unpack(); }
 	constexpr operator int() const { return unpack(); }
 
 	/// 1/(exp(-x)+1)
@@ -767,7 +777,7 @@ auto Posit<T,totalbits,esbits,FT,withnan>::analyze() -> info
         //constexpr int POSIT_RS_MAX = PT::POSIT_SIZE-1-esbits;
 
 		i.sign = (pa & PT::POSIT_SIGNBIT) != 0;
-        pa = pa < 0 ? -pa : pa;
+        pa = pabs(pa);
         POSIT_UTYPE pars = pa << (PT::POSIT_EXTRA_BITS+1); // output MSB: RS ES FS 
         auto q = PT::decode_posit_rs(pars);	
         int reg = q.first;
@@ -841,7 +851,7 @@ namespace std
 	inline CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan> abs(Posit<T,totalbits,esbits,FT,withnan> z) 
 	{
 		using PP=Posit<T,totalbits,esbits,FT,withnan>;
-		return PP(PP::DeepInit(),z.v < 0 ? -z.v : z.v);
+		return PP(PP::DeepInit(),pabs(z.v));
 	}
 
 	template <class T,int totalbits, int esbits, class FT, bool withnan>

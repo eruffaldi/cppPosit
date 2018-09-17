@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <iostream>
 #include <ratio>
+#include <limits>
 #include <bitset>
 #include <inttypes.h>
 #include "bithippop.hpp"
@@ -77,6 +78,7 @@ struct Unpacked
 	explicit CONSTEXPR14 Unpacked(float p) { unpack_float(p); }
 	explicit CONSTEXPR14 Unpacked(double p) { unpack_double(p); }
     explicit CONSTEXPR14 Unpacked(halffloat p) { unpack_half(p); }
+    explicit CONSTEXPR14 Unpacked(int i) { unpack_int(i); }
     explicit CONSTEXPR14 Unpacked(Type t , bool anegativeSign = false): type(t) ,negativeSign(anegativeSign) {};
 
     // expect 1.xxxxxx otherwise make it 0.xxxxxxxxx
@@ -85,6 +87,7 @@ struct Unpacked
 	CONSTEXPR14 void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
 	CONSTEXPR14 void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
     CONSTEXPR14 void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
+    CONSTEXPR14 void unpack_int(int i);
 
 	constexpr operator float () const { return  pack_xfloat<single_trait>(); }
 	constexpr operator double () const { return  pack_xfloat<double_trait>(); }
@@ -357,6 +360,14 @@ struct Unpacked
 
 };
 
+template <class FT, class ET>
+CONSTEXPR14 void unpack_int(int x)
+{
+    negativeSign = x < 0;
+    x = std::abs(x);
+    exponent = findbitleftmostC(x);
+    // from left aligned to 
+}
 
 
 // https://www.h-schmidt.net/FloatConverter/IEEE754.html
@@ -447,26 +458,42 @@ struct fraction_bit_extract<abits,AT,bbits,BT,false,msb>
     }
 };
 
-
+/**
+ * Convert (s,2**E,F) to int
+ */
 template <class FT,class ET>
 CONSTEXPR14 int Unpacked<FT,ET>::pack_int() const
 {
-    #if 0
-    // TODO: decide for Infinity and NaN
-    // i32_fromNegOverflow
-    // i32_fromPosOverflow
-    // 
     switch(type)
     {
         case Infinity:
             return 0;
         case Zero:
-            return 0;
+            return 0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         case NaN:
             return 0;
         default:
             break;
     }
+    if(exponent > 31)
+    {
+        return negativeSign ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
+    }    
+    else
+    {
+        // fraction is 1.xxxx left aligned over K bits
+        // take first exponent-1 bits and right align
+        //
+        // sizeof(FT)*8-(exponent-1)
+        int r = (1 << exponent) | (fraction >> (sizeof(FT)*8-(exponent-1)));
+        return negativeSign ? -r : r;
+    }
+    #if 0
+    // TODO: decide for Infinity and NaN
+    // i32_fromNegOverflow
+    // i32_fromPosOverflow
+    // 
+
 
     largest_type<ET,typename int_least_bits<16>::type > fexp = exponent;
 
@@ -583,5 +610,3 @@ CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
 	}
 	return value;
 }
-
-

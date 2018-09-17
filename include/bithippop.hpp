@@ -7,6 +7,8 @@
 
 #include <bitset>
 #include <stdint.h>
+#include <type_traits>
+
 #ifndef __arm__
 #include "x86intrin.h"
 #endif
@@ -39,6 +41,7 @@ constexpr typename std::remove_reference<T>::type makeprval(T && t)
 
 #define isprvalconstexpr(e) noexcept(makeprval(e))
 
+// __builtin_clzll
 constexpr inline uint64_t __builtin_clz64(uint64_t v) 
 {
 	return (v >> 32 != 0 ? __builtin_clz(v>>32) : 32 + __builtin_clz(v));
@@ -218,9 +221,10 @@ constexpr T pcabs(T x)
 	return x < 0 ? -x : x;
 }
 
+/// 
 /// absolute value of signed integer without conditions
-template <class T>
-CONSTEXPR14 T pabs(T x)
+template <class T> // ,typename std::enable_if<std::is_integral<T>::value ,int>::type* = nullptr>
+constexpr T pabs(T x)
 {
 	T mask = (x >> (sizeof(T) * 8 - 1));
 	return (x + mask) ^ mask;

@@ -186,10 +186,10 @@ public:
 };
 
 template <class T,int totalbits, int esbits, bool withnan>
-class Posit<T,totalbits,esbits,double,withnan>: public PositF<T,totalbits,esbits,float,withnan>
+class Posit<T,totalbits,esbits,double,withnan>: public PositF<T,totalbits,esbits,double,withnan>
 {
 public:
-	using PositF<T,totalbits,esbits,float,withnan>::PositF;
+	using PositF<T,totalbits,esbits,double,withnan>::PositF;
 };
 
 
