@@ -284,7 +284,7 @@ public:
 	/// absolute value
 	/// TODO: use (v ^ mask) - mask   OR (x+mask)^nasj
 	/// where int const mask = v >> sizeof(int) * CHAR_BIT - 1;
-	constexpr Posit abs()  const { return Posit(DeepInit(),pabs(v));  }  // could be >= infinity because infinity is sign symmetric
+	constexpr Posit abs()  const { return Posit(DeepInit(),pcabs(v));  }  // could be >= infinity because infinity is sign symmetric
 
 	/// negation
 	constexpr Posit neg()  const { return Posit(DeepInit(),-v); }; 
@@ -589,7 +589,7 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpack_low() const -> Unp
 
 		//r.type = UnpackedT::Regular;
 		bool negativeSign = (v & PT::POSIT_SIGNBIT) != 0;
-		//std::cout << "unpacking " << std::bitset<sizeof(T)*8>(pa) << " abs " << std::bitset<sizeof(T)*8>(pabs(pa)) << " r.negativeSign? " << r.negativeSign << std::endl;
+		//std::cout << "unpacking " << std::bitset<sizeof(T)*8>(pa) << " abs " << std::bitset<sizeof(T)*8>(pcabs(pa)) << " r.negativeSign? " << r.negativeSign << std::endl;
         T pa = negativeSign ? -v : v;
 	//	std::cout << "after " << std::hex << pa << std::endl;
 
@@ -777,7 +777,7 @@ auto Posit<T,totalbits,esbits,FT,withnan>::analyze() -> info
         //constexpr int POSIT_RS_MAX = PT::POSIT_SIZE-1-esbits;
 
 		i.sign = (pa & PT::POSIT_SIGNBIT) != 0;
-        pa = pabs(pa);
+        pa = pcabs(pa);
         POSIT_UTYPE pars = pa << (PT::POSIT_EXTRA_BITS+1); // output MSB: RS ES FS 
         auto q = PT::decode_posit_rs(pars);	
         int reg = q.first;
@@ -851,7 +851,7 @@ namespace std
 	inline CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan> abs(Posit<T,totalbits,esbits,FT,withnan> z) 
 	{
 		using PP=Posit<T,totalbits,esbits,FT,withnan>;
-		return PP(PP::DeepInit(),pabs(z.v));
+		return PP(PP::DeepInit(),pcabs(z.v));
 	}
 
 	template <class T,int totalbits, int esbits, class FT, bool withnan>

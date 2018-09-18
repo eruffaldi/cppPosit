@@ -48,28 +48,32 @@ constexpr inline uint64_t __builtin_clz64(uint64_t v)
 }
 
 // this is constexpr, others not
+// never call with input==0
 constexpr inline int findbitleftmostC(uint64_t input)
 {
-	return input == 0 ? sizeof(input)*8 : __builtin_clz64(input);
+	return __builtin_clz64(input);
 }
 
 // this is constexpr, others not
+// never call with input==0
 constexpr inline int findbitleftmostC(uint32_t input)
 {
-	return input == 0 ? sizeof(input)*8 : __builtin_clz(input);
+	return __builtin_clz(input);
 }
 
 
 // this is constexpr, others not
+// never call with input==0
 constexpr inline int findbitleftmostC(uint16_t input)
 {
-	return input == 0 ? sizeof(input)*8 : __builtin_clz((uint32_t)input)-16;
+	return __builtin_clz((uint32_t)input)-16;
 }
 
 // this is constexpr, others not
+// never call with input==0
 constexpr inline int findbitleftmostC(uint8_t input)
 {
-	return input == 0 ? sizeof(input)*8 : __builtin_clz((uint32_t)input)-24;
+	return __builtin_clz((uint32_t)input)-24;
 }
 
 #ifndef __arm__

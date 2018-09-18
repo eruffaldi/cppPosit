@@ -17,6 +17,7 @@
 #include "bithippop.hpp"
 #include <math.h>
 #include "floattraits.hpp"
+#include "fixedtraits.hpp"
 #include "typehelpers.hpp"
 
 inline std::ostream & operator << (std::ostream & ons, __int128_t x)
@@ -43,10 +44,10 @@ struct Unpacked
     static_assert(std::is_signed<ET>::value,"Unpacked requires signed exponent type");
     using POSIT_LUTYPE = FT;
 	enum {
-		POSIT_FRAC_TYPE_SIZE_BITS = sizeof(FT) * 8
+		FT_bits = sizeof(FT) * 8
 	};
 	enum : FT {
-		POSIT_FRAC_TYPE_MSB = (((FT)1) << (POSIT_FRAC_TYPE_SIZE_BITS - 1))
+		FT_leftmost_bit = (((FT)1) << (FT_bits - 1))
 	};
     #ifndef UnpackedDualSel
     #define UnpackedDualSel(a,b) ((a)+(b)*4)
@@ -81,25 +82,33 @@ struct Unpacked
     explicit CONSTEXPR14 Unpacked(int i) { unpack_int(i); }
     explicit CONSTEXPR14 Unpacked(Type t , bool anegativeSign = false): type(t) ,negativeSign(anegativeSign) {};
 
+    template <class Trait, typename std::enable_if<std::is_integral<typename Trait::value_t>{},int> = 0> 
+    explicit CONSTEXPR14 Unpacked(typename Trait::value_t i) { unpack_xfixed<Trait>(i); }
+
+    template <class Trait, typename std::enable_if<!std::is_integral<typename Trait::value_t>{},int> = 0> 
+    explicit CONSTEXPR14 Unpacked(typename Trait::holder_t i) { unpack_xfloat<Trait>(i); }
+
     // expect 1.xxxxxx otherwise make it 0.xxxxxxxxx
     explicit CONSTEXPR14 Unpacked(ET aexponent, FT afraction, bool anegativeSign ): type(Regular) ,negativeSign(anegativeSign),exponent(aexponent),fraction(afraction)  {}
 
 	CONSTEXPR14 void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
 	CONSTEXPR14 void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
     CONSTEXPR14 void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
-    CONSTEXPR14 void unpack_int(int i);
+    CONSTEXPR14 void unpack_int(int i) { unpack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(i); }
 
-	constexpr operator float () const { return  pack_xfloat<single_trait>(); }
-	constexpr operator double () const { return  pack_xfloat<double_trait>(); }
-    constexpr operator halffloat() const { return  pack_xfloat<half_trait>(); }
-    constexpr operator int() const { return  pack_int(); }
+	constexpr operator float () const { return pack_xfloat<single_trait>(); }
+	constexpr operator double () const { return pack_xfloat<double_trait>(); }
+    constexpr operator halffloat() const { return pack_xfloat<half_trait>(); }
+    constexpr operator int() const { return pack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(); }
 
 	template <class Trait>
 	CONSTEXPR14 typename Trait::holder_t
 	pack_xfloati() const;
 
-    CONSTEXPR14 int
-    pack_int() const;
+    template <class Trait>
+    CONSTEXPR14
+    typename Trait::value_t
+    pack_xfixed() const;
 
     template <class Trait>
     typename Trait::value_t
@@ -129,10 +138,11 @@ struct Unpacked
     static constexpr Unpacked nan() { return Unpacked(NaN); }
     static constexpr Unpacked one() { return Unpacked(0,0,false); }
     static constexpr Unpacked zero() { return Unpacked(Zero);  }
+    template <class Trait>
+    static constexpr Unpacked make_fixed(typename Trait::value_t x) { Unpacked u; u.unpack_xfixed<Trait>(x); return u; }
 
-
-	bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ?exponent == u.exponent && fraction == u.fraction : true); }
-	bool operator != (const Unpacked & u) const { return !(*this == u); }
+	constexpr bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ?exponent == u.exponent && fraction == u.fraction : true); }
+	constexpr bool operator != (const Unpacked & u) const { return !(*this == u); }
     constexpr Unpacked operator-() const { return Unpacked(exponent,fraction,!negativeSign);  }
 
     CONSTEXPR14 Unpacked inv() const
@@ -151,8 +161,8 @@ struct Unpacked
                 	// one == 0,0,false
     	        // TODO FIX SIGN/INFINITY/NAN
     		        // put hidden 1. in mantiss
-    			    POSIT_LUTYPE afrac = POSIT_FRAC_TYPE_MSB;
-    			    POSIT_LUTYPE bfrac = POSIT_FRAC_TYPE_MSB | (fraction >> 1);
+    			    POSIT_LUTYPE afrac = FT_leftmost_bit;
+    			    POSIT_LUTYPE bfrac = FT_leftmost_bit | (fraction >> 1);
                  //   std::cout << "inversion " << std::hex  << bfrac << " exponent" << exponent << std::endl;
     			    auto exp =  - exponent;
 
@@ -161,7 +171,7 @@ struct Unpacked
     			        bfrac >>= 1;
     			    }
 
-    			    return Unpacked(exp, ( ((typename nextinttype<FT>::type)afrac)  << POSIT_FRAC_TYPE_SIZE_BITS) / bfrac,negativeSign);
+    			    return Unpacked(exp, ( ((typename nextinttype<FT>::type)afrac)  << FT_bits) / bfrac,negativeSign);
 
                     //return one()/(*this);
                 }
@@ -177,12 +187,14 @@ struct Unpacked
 
     }
 	
+    template <class Trait>
+    CONSTEXPR14 void unpack_xfixed(typename Trait::value_t value);
 
 	template <class Trait>
 	CONSTEXPR14 void unpack_xfloati(typename Trait::holder_t value);
 
     template <class Trait>
-    void unpack_xfloat(typename Trait::value_t value) // CANNOT be constexpr
+    void unpack_xfloat(typename Trait::value_t value) // CANNOT be constexpr, except using the expensive float2bits
     {
         union {
             typename Trait::holder_t i;
@@ -217,8 +229,8 @@ struct Unpacked
                 // move right means increment exponent
                 // 1.xxxx => 0.1xxxxxx 
                 // 1.yyyy => 0.1yyyyyy
-                POSIT_LUTYPE afrac1 = (POSIT_FRAC_TYPE_MSB>>1) | (a.fraction >> 2); // denormalized and shifted right
-                POSIT_LUTYPE bfrac1 = (POSIT_FRAC_TYPE_MSB>>1) | (b.fraction >> 2);
+                POSIT_LUTYPE afrac1 = (FT_leftmost_bit>>1) | (a.fraction >> 2); // denormalized and shifted right
+                POSIT_LUTYPE bfrac1 = (FT_leftmost_bit>>1) | (b.fraction >> 2);
                 POSIT_LUTYPE afrac = dir < 0 ? (afrac1 >> -dir) : afrac1; // denormalized and shifted right
                 POSIT_LUTYPE bfrac = dir < 0 ? bfrac1 : (bfrac1 >> dir); 
 
@@ -266,14 +278,14 @@ struct Unpacked
         {
             case UnpackedDualSel(Regular,Regular):
             {
-                POSIT_LUTYPE afrac = POSIT_FRAC_TYPE_MSB | (a.fraction >> 1);
-                POSIT_LUTYPE bfrac = POSIT_FRAC_TYPE_MSB | (b.fraction >> 1);
-                auto frac = ((((typename nextinttype<FT>::type)afrac) * bfrac) >> POSIT_FRAC_TYPE_SIZE_BITS);
-                bool q = (frac & POSIT_FRAC_TYPE_MSB) == 0;
+                POSIT_LUTYPE afrac = FT_leftmost_bit | (a.fraction >> 1);
+                POSIT_LUTYPE bfrac = FT_leftmost_bit | (b.fraction >> 1);
+                auto frac = ((((typename nextinttype<FT>::type)afrac) * bfrac) >> FT_bits);
+                bool q = (frac & FT_leftmost_bit) == 0;
                 auto rfrac = q ? (frac << 1): frac;
                 auto exp = a.exponent + b.exponent + (q ? 0: 1);
                 #if 0
-                if ((frac & POSIT_FRAC_TYPE_MSB) == 0) {
+                if ((frac & FT_leftmost_bit) == 0) {
                     exp--;
                     frac <<= 1;
                 }
@@ -308,8 +320,8 @@ struct Unpacked
         {
             case UnpackedDualSel(Regular,Regular):
             {
-                POSIT_LUTYPE afrac = POSIT_FRAC_TYPE_MSB | (a.fraction >> 1);
-                POSIT_LUTYPE bfrac1 = POSIT_FRAC_TYPE_MSB | (b.fraction >> 1);
+                POSIT_LUTYPE afrac = FT_leftmost_bit | (a.fraction >> 1);
+                POSIT_LUTYPE bfrac1 = FT_leftmost_bit | (b.fraction >> 1);
                 auto exp = a.exponent - b.exponent + (afrac < bfrac1 ? -1 : 0);
                 POSIT_LUTYPE bfrac = afrac < bfrac1 ? (bfrac1 >> 1) : bfrac1;
                 /*
@@ -319,7 +331,7 @@ struct Unpacked
                 }
                 */
 
-                return Unpacked(exp,  (((typename nextinttype<FT>::type)afrac) << POSIT_FRAC_TYPE_SIZE_BITS) / bfrac,a.negativeSign ^ b.negativeSign);
+                return Unpacked(exp,  (((typename nextinttype<FT>::type)afrac) << FT_bits) / bfrac,a.negativeSign ^ b.negativeSign);
             }
             case UnpackedDualSel(Zero,Zero):
             case UnpackedDualSel(Infinity,Infinity):
@@ -361,12 +373,34 @@ struct Unpacked
 };
 
 template <class FT, class ET>
-CONSTEXPR14 void unpack_int(int x)
+template <class Trait>
+CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfixed(typename Trait::value_t nx)
 {
-    negativeSign = x < 0;
-    x = std::abs(x);
-    exponent = findbitleftmostC(x);
-    // from left aligned to 
+    // TODO: handle infinity or nan in Trait
+    if(nx != 0)
+    {
+        using UT = typename std::make_unsigned<typename Trait::value_t>::type;
+        type = Regular;
+        negativeSign = nx < 0;
+        UT x = pcabs(nx);
+        const int p = Trait::totalbits-findbitleftmostC(x)-1; // 31->0,0->31
+        exponent = (p-Trait::fraction_bits);
+        UT ux = x & ~(1 << p); //(x << (Trait::totalbits-p));
+
+
+        // x : 0[N-p-1] 1 ?[p]
+        // ux: 0[N-p-1] 0 ?[p]
+        // f1: ?[p]
+        // take all p bits rightmost of x and make them leftmost
+        fraction = cast_right_to_left<UT,Trait::totalbits,FT,FT_bits>()(ux);
+    }
+    else
+    {
+        exponent = 0;
+        fraction = 0;
+        type = Zero;
+        negativeSign = false;
+    }
 }
 
 
@@ -385,12 +419,12 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
 	//std::cout << std::hex << "exponent output " << std::hex << exponent  << " " << std::dec << exponent << " fraction " << std::hex << fraction << std::endl;
 
 	// fractional part is LSB of the holder_t and of length 
-    fraction = cast_right_to_left<typename Trait::holder_t,Trait::fraction_bits,FT,POSIT_FRAC_TYPE_SIZE_BITS>()(value);
+    fraction = cast_right_to_left<typename Trait::holder_t,Trait::fraction_bits,FT,FT_bits>()(value);
 
-	//if(POSIT_FRAC_TYPE_SIZE_BITS < Trait::fraction_bits)
-	//	fraction = bitset_getT(value,0,Trait::fraction_bits) >> (Trait::fraction_bits-POSIT_FRAC_TYPE_SIZE_BITS);
+	//if(FT_bits < Trait::fraction_bits)
+	//	fraction = bitset_getT(value,0,Trait::fraction_bits) >> (Trait::fraction_bits-FT_bits);
 	//else
-	//	fraction = ((POSIT_LUTYPE)bitset_getT(value,0,Trait::fraction_bits)) << (POSIT_FRAC_TYPE_SIZE_BITS-Trait::fraction_bits);
+	//	fraction = ((POSIT_LUTYPE)bitset_getT(value,0,Trait::fraction_bits)) << (FT_bits-Trait::fraction_bits);
 
 	// stored exponent: 0, x, exponent_mask === 0, any, infinity
 	// biased: -max, -max+1, ..., max, max+1 === 0, min, ..., max, infinity
@@ -462,7 +496,8 @@ struct fraction_bit_extract<abits,AT,bbits,BT,false,msb>
  * Convert (s,2**E,F) to int
  */
 template <class FT,class ET>
-CONSTEXPR14 int Unpacked<FT,ET>::pack_int() const
+template <class Trait>
+CONSTEXPR14 typename Trait::value_t Unpacked<FT,ET>::pack_xfixed() const
 {
     switch(type)
     {
@@ -475,83 +510,31 @@ CONSTEXPR14 int Unpacked<FT,ET>::pack_int() const
         default:
             break;
     }
-    if(exponent > 31)
+    constexpr int intbits = Trait::totalbits-Trait::fraction_bits;
+    if(exponent >= intbits)
     {
-        return negativeSign ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    }    
+        return negativeSign ? std::numeric_limits<typename Trait::value_t>::lowest() : std::numeric_limits<typename Trait::value_t>::max();
+    }   
+    else if(exponent < -Trait::fraction_bits)
+    {
+        return 0;
+    } 
     else
     {
-        // fraction is 1.xxxx left aligned over K bits
-        // take first exponent-1 bits and right align
-        //
-        // sizeof(FT)*8-(exponent-1)
-        int r = (1 << exponent) | (fraction >> (sizeof(FT)*8-(exponent-1)));
+        using ST = typename Trait::value_t;
+        using UT = typename std::make_unsigned<ST>::type;
+        // fraction 1.xxxxx from left aligned over FT bytes to UT bytes still left aligned over Trait::totalbits
+        UT f = fraction_bit_extract<FT_bits,FT,Trait::totalbits,UT,(FT_bits > Trait::totalbits),FT_leftmost_bit>::pack(fraction);
+
+        // add the 1 bit for the current exponent
+        // f[totalbits] -> 0[intbits-exponent+1] 1 f[exponent+Trait::fraction_bits-1]
+        // 
+        // extrema: e.g. for totalbits=32, whatever fraction
+        // - exponent==-Trait::fraction_bits ==> 1 | 0
+        // - exponent==intbits-1 ==> 0x8000000 | (F >> 1) 
+        ST r = (ST(1) << (exponent+Trait::fraction_bits)) | (ST)(f >> (intbits-exponent));
         return negativeSign ? -r : r;
     }
-    #if 0
-    // TODO: decide for Infinity and NaN
-    // i32_fromNegOverflow
-    // i32_fromPosOverflow
-    // 
-
-
-    largest_type<ET,typename int_least_bits<16>::type > fexp = exponent;
-
-    /*
-    roundIncrement softfloat_round_near_maxMag
-                   softfloat_round_near_even
-                   softfloat_round_odd
-                   softfloat_round_min
-                   softfloat_round_max
-
-    if ( exp ) sig |= 0x00800000;
-    sig64 = (uint_fast64_t) sig<<32;
-    shiftDist = 0xAA - exp;
-    if ( 0 < shiftDist ) sig64 = softfloat_shiftRightJam64( sig64, shiftDist );
-    softfloat_roundToI32( sign, sig64, roundingMode, exact ) from
-
-    roundBits = sig & 0xFFF;
-    sig += roundIncrement;
-    if ( sig & UINT64_C( 0xFFFFF00000000000 ) ) goto invalid;
-    sig32 = sig>>12;
-    if (
-        (roundBits == 0x800) && (roundingMode == softfloat_round_near_even)
-    ) {
-        sig32 &= ~(uint_fast32_t) 1;
-    }
-
-    */
-    // left aligned
-    typename Trait::holder_t fexpbits = 0;
-    typename Trait::holder_t ffracbits = 0;
-
-    if (fexp > Trait::exponent_max) // AKA 254 for single
-    {
-        // overflow, set maximum value
-        fexpbits = ((typename Trait::holder_t)Trait::exponent_max) << (Trait::fraction_bits); // AKA 254 and 23
-        ffracbits = -1;
-    }
-    else if (fexp < 1) {
-        // fraction is stored POSIT_FRAC_TYPE_SIZE_BITS and we need to
-        // underflow, pack as denormal
-        if (fraction != 0) {
-            // shrink expand fractional part with 1. as denormal
-            ffracbits = fraction_bit_extract<POSIT_FRAC_TYPE_SIZE_BITS,FT,Trait::fraction_bits,typename Trait::holder_t,(POSIT_FRAC_TYPE_SIZE_BITS > Trait::fraction_bits),POSIT_FRAC_TYPE_MSB>::packdenorm(fraction);
-            // use denormalization
-            ffracbits >>= -fexp;
-        }
-    }
-    else
-    {
-        fexpbits = ((typename Trait::holder_t)(fexp & Trait::exponent_mask)) << (Trait::fraction_bits); // AKA 0xFF and 23 for single
-        ffracbits = fraction_bit_extract<POSIT_FRAC_TYPE_SIZE_BITS,FT,Trait::fraction_bits,typename Trait::holder_t,(POSIT_FRAC_TYPE_SIZE_BITS > Trait::fraction_bits),POSIT_FRAC_TYPE_MSB>::pack(fraction);
-    }
-
-    int value = ffracbits|fexpbits;
-    return negativeSign ? -value : value;
-    #else
-    return 0;
-    #endif
 }
 
 template <class FT,class ET>
@@ -584,11 +567,11 @@ CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
 		ffracbits = -1;
 	}
 	else if (fexp < 1) {
-		// fraction is stored POSIT_FRAC_TYPE_SIZE_BITS and we need to
+		// fraction is stored FT_bits and we need to
 		// underflow, pack as denormal
 		if (fraction != 0) {
 			// shrink expand fractional part with 1. as denormal
-            ffracbits = fraction_bit_extract<POSIT_FRAC_TYPE_SIZE_BITS,FT,Trait::fraction_bits,typename Trait::holder_t,(POSIT_FRAC_TYPE_SIZE_BITS > Trait::fraction_bits),POSIT_FRAC_TYPE_MSB>::packdenorm(fraction);
+            ffracbits = fraction_bit_extract<FT_bits,FT,Trait::fraction_bits,typename Trait::holder_t,(FT_bits > Trait::fraction_bits),FT_leftmost_bit>::packdenorm(fraction);
 			// use denormalization
 			ffracbits >>= -fexp;
 		}
@@ -596,7 +579,7 @@ CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
 	else
 	{
 		fexpbits = ((typename Trait::holder_t)(fexp & Trait::exponent_mask)) << (Trait::fraction_bits); // AKA 0xFF and 23 for single
-        ffracbits = fraction_bit_extract<POSIT_FRAC_TYPE_SIZE_BITS,FT,Trait::fraction_bits,typename Trait::holder_t,(POSIT_FRAC_TYPE_SIZE_BITS > Trait::fraction_bits),POSIT_FRAC_TYPE_MSB>::pack(fraction);
+        ffracbits = fraction_bit_extract<FT_bits,FT,Trait::fraction_bits,typename Trait::holder_t,(FT_bits > Trait::fraction_bits),FT_leftmost_bit>::pack(fraction);
 	}
 
 	typename Trait::holder_t value = ffracbits|fexpbits;
