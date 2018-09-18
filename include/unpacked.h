@@ -388,9 +388,12 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfixed(typename Trait::value_t nx)
         UT ux = x & ~(1 << p); //(x << (Trait::totalbits-p));
 
 
-        // x : 0[N-p-1] 1 ?[p]
-        // ux: 0[N-p-1] 0 ?[p]
-        // f1: ?[p]
+        // UT x : 0[N-p-1] 1 ?[p]
+        // corner cases:
+        //  x: 1 ?[N-1]
+        //  x: 0[N-1] 1
+        // UT ux: ?[p] 0[N-p]
+        // FT f:  ?[min(p,size(FT)] 0[size(FT)-min(p,size(FT)] 
         // take all p bits rightmost of x and make them leftmost
         fraction = cast_right_to_left<UT,Trait::totalbits,FT,FT_bits>()(ux);
     }
