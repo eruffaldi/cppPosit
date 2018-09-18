@@ -141,7 +141,7 @@ struct Unpacked
     template <class Trait>
     static constexpr Unpacked make_fixed(typename Trait::value_t x) { Unpacked u; u.unpack_xfixed<Trait>(x); return u; }
 
-	constexpr bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ?exponent == u.exponent && fraction == u.fraction : true); }
+	constexpr bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ? (exponent == u.exponent && fraction == u.fraction) : true); }
 	constexpr bool operator != (const Unpacked & u) const { return !(*this == u); }
     constexpr Unpacked operator-() const { return Unpacked(exponent,fraction,!negativeSign);  }
 
@@ -385,7 +385,7 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfixed(typename Trait::value_t nx)
         UT x = pcabs(nx);
         const int p = Trait::totalbits-findbitleftmostC(x)-1; // 31->0,0->31
         exponent = (p-Trait::fraction_bits);
-        UT ux = x & ~(1 << p); //(x << (Trait::totalbits-p));
+        UT ux = p == 0 ? 0 : (x << (Trait::totalbits-p));
 
 
         // UT x : 0[N-p-1] 1 ?[p]

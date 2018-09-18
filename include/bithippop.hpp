@@ -228,7 +228,7 @@ constexpr T pcabs(T x)
 /// 
 /// absolute value of signed integer without conditions
 template <class T> // ,typename std::enable_if<std::is_integral<T>::value ,int>::type* = nullptr>
-constexpr T pabs(T x)
+CONSTEXPR14 T pabs(T x)
 {
 	T mask = (x >> (sizeof(T) * 8 - 1));
 	return (x + mask) ^ mask;
