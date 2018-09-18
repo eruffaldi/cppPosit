@@ -423,10 +423,13 @@ public:
 
 	FullWriter describe() const { return FullWriter(v); }
 
+#ifndef FPGAHLS
 	friend std::ostream & operator << (std::ostream &ons, const FullWriter & w)
 	{
 		return ons;
 	}
+#endif
+
 
 };
 
@@ -500,14 +503,14 @@ CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan>::Posit(int xvalue)
 	}
 }
 #endif
+#ifndef FPGAHLS
 template <class T, int totalbits, int esbits, class FT, bool withnan>
 std::ostream & operator << (std::ostream & ons, Posit<T,totalbits,esbits,FT,withnan> const & o)
 {
 	ons << o.unpack();
 	return ons;
 }
-
-
+#endif
 
 
 /// Level 1: -exponent of unpacked
@@ -807,6 +810,7 @@ CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,withnan> & p) ->
 	return PP::unpacked_low2full(p.unpack_low());
 }
 
+#ifndef FPGAHLS
 template <class X>
 void printinfo(std::ostream & ons, typename X::value_t v)
 {
@@ -829,6 +833,9 @@ void printinfo(std::ostream & ons, typename X::value_t v)
         ons << " binary:" << std::bitset<sizeof(typename X::value_t)*8>(xux.v) << ")";
      }	
 }
+#endif
+
+#ifndef FPGAHLS
 
 template <class T>
 struct posit_formatter
@@ -844,6 +851,7 @@ public:
 
 	T posit;
 };
+#endif
 
 namespace std
 {

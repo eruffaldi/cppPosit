@@ -9,7 +9,9 @@
 #pragma once
 
 #include <cstdint>
+#ifndef FPGAHLS
 #include <iostream>
+#endif
 #include <ratio>
 #include <limits>
 #include <bitset>
@@ -20,11 +22,27 @@
 #include "fixedtraits.hpp"
 #include "typehelpers.hpp"
 
+#ifndef FPGAHLS
 inline std::ostream & operator << (std::ostream & ons, __int128_t x)
 {
     ons << "cannot print int128";
     return ons;
 }
+
+namespace std
+{
+template <class T>
+T min(T a, T b)
+{
+    return b < a ? b: a;
+}
+template <class T>
+T max(T a, T b)
+{
+    return b > a ? b: a;
+}
+}
+#endif
 
 template<class T>
 constexpr const T& clamp( const T& v, const T& lo, const T& hi )
@@ -94,7 +112,7 @@ struct Unpacked
 	CONSTEXPR14 void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
 	CONSTEXPR14 void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
     CONSTEXPR14 void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
-    CONSTEXPR14 void unpack_int(int i) { unpack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(i); }
+    CONSTEXPR14 Unpacked& unpack_int(int i) { return unpack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(i); }
 
 	constexpr operator float () const { return pack_xfloat<single_trait>(); }
 	constexpr operator double () const { return pack_xfloat<double_trait>(); }
@@ -139,7 +157,7 @@ struct Unpacked
     static constexpr Unpacked one() { return Unpacked(0,0,false); }
     static constexpr Unpacked zero() { return Unpacked(Zero);  }
     template <class Trait>
-    static constexpr Unpacked make_fixed(typename Trait::value_t x) { Unpacked u; u.unpack_xfixed<Trait>(x); return u; }
+    static constexpr Unpacked make_fixed(typename Trait::value_t x) { return Unpacked().unpack_xfixed<Trait>(x);  }
 
 	constexpr bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ? (exponent == u.exponent && fraction == u.fraction) : true); }
 	constexpr bool operator != (const Unpacked & u) const { return !(*this == u); }
@@ -188,7 +206,7 @@ struct Unpacked
     }
 	
     template <class Trait>
-    CONSTEXPR14 void unpack_xfixed(typename Trait::value_t value);
+    CONSTEXPR14 Unpacked& unpack_xfixed(typename Trait::value_t value);
 
 	template <class Trait>
 	CONSTEXPR14 void unpack_xfloati(typename Trait::holder_t value);
@@ -348,7 +366,7 @@ struct Unpacked
         }
 	}
     
-    
+#ifndef FPGAHLS
 	friend std::ostream & operator << (std::ostream & ons, Unpacked const & o)
     {
         switch(o.type)
@@ -368,13 +386,13 @@ struct Unpacked
         }
         return ons;
     }
-
+#endif
 
 };
 
 template <class FT, class ET>
 template <class Trait>
-CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfixed(typename Trait::value_t nx)
+CONSTEXPR14 Unpacked<FT,ET> & Unpacked<FT,ET>::unpack_xfixed(typename Trait::value_t nx)
 {
     // TODO: handle infinity or nan in Trait
     if(nx != 0)
@@ -404,6 +422,7 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfixed(typename Trait::value_t nx)
         type = Zero;
         negativeSign = false;
     }
+    return *this;
 }
 
 

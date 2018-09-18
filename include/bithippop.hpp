@@ -5,7 +5,10 @@
  */
 #pragma once
 
-#include <bitset>
+#if defined(__SDSVHLS__) && !defined(FPGAHLS)
+#define FPGAHLS
+#endif
+
 #include <stdint.h>
 #include <type_traits>
 
@@ -20,6 +23,7 @@
 #define CONSTEXPR14
 #endif
 #endif
+
 
 // C version
 #define BIT_MASK(__TYPE__, __ONE_COUNT__) \
@@ -76,7 +80,7 @@ constexpr inline int findbitleftmostC(uint8_t input)
 	return __builtin_clz((uint32_t)input)-24;
 }
 
-#ifndef __arm__
+#if !defined(__arm__) && !defined(FPGAHLS)
 inline int findbitleftmost(uint8_t input)
 {
 	return  __lzcnt16(input)-8;
@@ -129,7 +133,7 @@ CONSTEXPR14 T bitset_get(T input, int offset, int size)
 	auto M = bitmask<T>(size);
 	return (input >> offset) & M;
 }
-#ifndef __arm__
+#if !defined(__arm__) && !defined(FPGAHLS)
 inline uint64_t bitset_gethw(uint64_t input, int offset, int size)
 {
 	return _bextr_u64(input, offset, size);

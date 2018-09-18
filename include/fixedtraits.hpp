@@ -1,5 +1,6 @@
 #pragma once
 
+
 template <class T, int N, int F>
 struct fixedtrait
 {

@@ -1,6 +1,10 @@
 #pragma once
 #include <limits>
 
+#if defined(__SDSVHLS__) && !defined(FPGAHLS)
+#define FPGAHLS
+#endif
+
 
 struct halffloat
 {
@@ -77,8 +81,11 @@ struct single_trait
 	using value_t = float;
 	using holder_t = uint32_t;
 	static constexpr value_t zero = 0.0f;
+#ifndef FPGAHLS
 	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
 	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
+#endif
+
     static constexpr holder_t ninfinity_h = 0xff800000;
     static constexpr holder_t pinfinity_h = 0x7f800000;
     static constexpr holder_t nan_h = 0x7fc00000;
@@ -100,8 +107,10 @@ struct double_trait
 	using value_t = double;
 	using holder_t = uint64_t;
 	static constexpr value_t zero = 0.0;
+#ifndef FPGAHLS
 	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
 	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
+#endif
     static constexpr holder_t ninfinity_h = 0xfff0000000000000ULL;
     static constexpr holder_t pinfinity_h = 0x7ff0000000000000ULL;
     static constexpr holder_t nan_h = 0x7ff8000000000000ULL;
