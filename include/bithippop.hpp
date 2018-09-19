@@ -24,6 +24,12 @@
 #endif
 #endif
 
+#ifndef FPGAHLS
+#define CLZCONSTEXPR constexpr
+#else
+#define CLZCONSTEXPR 
+#endif
+
 
 // C version
 #define BIT_MASK(__TYPE__, __ONE_COUNT__) \
@@ -46,21 +52,21 @@ constexpr typename std::remove_reference<T>::type makeprval(T && t)
 #define isprvalconstexpr(e) noexcept(makeprval(e))
 
 // __builtin_clzll
-constexpr inline uint64_t __builtin_clz64(uint64_t v) 
+CLZCONSTEXPR inline uint64_t __builtin_clz64(uint64_t v) 
 {
 	return (v >> 32 != 0 ? __builtin_clz(v>>32) : 32 + __builtin_clz(v));
 }
 
 // this is constexpr, others not
 // never call with input==0
-constexpr inline int findbitleftmostC(uint64_t input)
+CLZCONSTEXPR inline int findbitleftmostC(uint64_t input)
 {
 	return __builtin_clz64(input);
 }
 
 // this is constexpr, others not
 // never call with input==0
-constexpr inline int findbitleftmostC(uint32_t input)
+CLZCONSTEXPR inline int findbitleftmostC(uint32_t input)
 {
 	return __builtin_clz(input);
 }
@@ -68,14 +74,14 @@ constexpr inline int findbitleftmostC(uint32_t input)
 
 // this is constexpr, others not
 // never call with input==0
-constexpr inline int findbitleftmostC(uint16_t input)
+CLZCONSTEXPR inline int findbitleftmostC(uint16_t input)
 {
 	return __builtin_clz((uint32_t)input)-16;
 }
 
 // this is constexpr, others not
 // never call with input==0
-constexpr inline int findbitleftmostC(uint8_t input)
+CLZCONSTEXPR inline int findbitleftmostC(uint8_t input)
 {
 	return __builtin_clz((uint32_t)input)-24;
 }

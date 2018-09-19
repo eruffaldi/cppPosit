@@ -78,10 +78,12 @@ struct half_trait : public any_floattrait<15,10,halffloat,uint16_t>
 // https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 struct single_trait
 {
-	using value_t = float;
-	using holder_t = uint32_t;
-	static constexpr value_t zero = 0.0f;
 #ifndef FPGAHLS
+	using value_t = float;
+#endif
+	using holder_t = uint32_t;
+#ifndef FPGAHLS
+	static constexpr value_t zero = 0.0f;
 	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
 	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
 #endif
@@ -104,10 +106,12 @@ struct single_trait
 // https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 struct double_trait
 {
-	using value_t = double;
-	using holder_t = uint64_t;
-	static constexpr value_t zero = 0.0;
 #ifndef FPGAHLS
+	using value_t = double;
+#endif
+	using holder_t = uint64_t;
+#ifndef FPGAHLS
+	static constexpr value_t zero = 0.0;
 	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
 	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
 #endif
@@ -131,7 +135,9 @@ struct double_trait
 // https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html
 struct double128_trait
 {
+#ifndef FPGAHLS
 	using value_t = __float128;
+#endif
 	using holder_t = unsigned __int128;
 
     static constexpr holder_t ninfinity_h = 0xb00000000000ffff8000000000000000;

@@ -11,7 +11,7 @@ X::PT::decode_posit_rs(1)
 #pragma once
 #include "unpacked.h"
 
-
+#ifndef FPGAHLS
 inline float uint32_to_float(uint32_t i)
 {
 	union {
@@ -21,6 +21,7 @@ inline float uint32_to_float(uint32_t i)
 	x.i = i;
 	return x.f;
 }
+#endif
 
 template <class T, int totalbits, int esbits, bool withnan_ >
 struct PositTrait
@@ -266,6 +267,10 @@ public:
 
 	Posit() {}
 
+	using single_tag = typename UnpackedT::single_tag;
+
+	CONSTEXPR14 explicit Posit(single_tag t, uint32_t p) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(t,p)).v; }
+
     /// construct passing the holding type x
 	CONSTEXPR14 explicit Posit(DeepInit, T x) : v(x) {} 
 
@@ -275,8 +280,10 @@ public:
 	/// construct from fully unpacked floating (s,e,F)
 	CONSTEXPR14 explicit Posit(UnpackedT u) : v(pack_posit<T,totalbits,esbits,FT,withnan>(u).v) {} 
 
+#ifndef FPGAHLS
     CONSTEXPR14 explicit Posit(float f): Posit(UnpackedT(f)) {}
 	CONSTEXPR14 explicit Posit(double d): Posit(UnpackedT(d)) {}
+#endif
 	CONSTEXPR14 explicit Posit(int i): Posit(UnpackedT(i)) {}
 
 	constexpr UnpackedT unpack() const { return unpack_posit<T,totalbits,esbits,FT,withnan>(*this); }
@@ -394,9 +401,12 @@ public:
 	// conversion
 
 	// max
+	constexpr uint32_t as_float_bin() const { return unpack().template pack_xfloati<single_trait>(); }
 	constexpr operator UnpackedT() const { return unpack(); }
+#ifndef FPGAHLS
 	constexpr operator float() const { return unpack(); }
 	constexpr operator double() const { return unpack(); }
+#endif
 	constexpr operator int() const { return unpack(); }
 
 	/// 1/(exp(-x)+1)
@@ -453,7 +463,7 @@ CONSTEXPR14 Posit<T,totalbits,esbits,FT,withnan>::Posit(int xvalue)
 	    int value = xvalue < 0 ? -xvalue: xvalue;
 
 		auto exponentF = rawexp - Trait::exponent_bias; // ((un.u >> Trait::fraction_bits) & Trait::exponent_mask)
-	    auto fractionF = cast_right_to_left<typename Trait::holder_t,Trait::fraction_bits,FT,UT::POSIT_FRAC_TYPE_SIZE_BITS>()(value);
+	    auto fractionF = cast_right_to_left<typename Trait::holder_t,Trait::fraction_bits,FT,UT::FT_bits>()(value);
 
 		if(rawexp == ((1 << Trait::exponent_bits)-1))
 		{
@@ -718,7 +728,7 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,withnan>::unpacked_low2full(Unpacke
 
     if(q.type == UnpackedT::Regular)
     {
-        r.fraction = cast_msb<POSIT_UTYPE,PT::POSIT_HOLDER_SIZE,FT,UnpackedT::POSIT_FRAC_TYPE_SIZE_BITS>()(q.fraction);
+        r.fraction = cast_msb<POSIT_UTYPE,PT::POSIT_HOLDER_SIZE,FT,UnpackedT::FT_bits>()(q.fraction);
         r.exponent = PT::join_reg_exp(q.regime,q.exp);
     }
 	return r;
@@ -789,7 +799,7 @@ auto Posit<T,totalbits,esbits,FT,withnan>::analyze() -> info
         POSIT_UTYPE exp = bitset_leftmost_getT(pars,esbits);
         pars <<= esbits; // output MSB: FS left aligned in T
         //std::cout << std::bitset<PT::POSIT_HOLDER_SIZE>(pars) << std::endl;
-        i.ifraction = sizeof(FT) >= sizeof(T) ? pars << (UT::POSIT_FRAC_TYPE_SIZE_BITS-PT::POSIT_HOLDER_SIZE) : pars >> (PT::POSIT_HOLDER_SIZE-UT::POSIT_FRAC_TYPE_SIZE_BITS); // output: FS left aligned in FT (larger or equal to T)
+        i.ifraction = sizeof(FT) >= sizeof(T) ? pars << (UT::FT_bits-PT::POSIT_HOLDER_SIZE) : pars >> (PT::POSIT_HOLDER_SIZE-UT::FT_bits); // output: FS left aligned in FT (larger or equal to T)
     	i.exponent = PT::join_reg_exp(reg,exp);
     	i.exp = exp;
     	i.rs = rs;

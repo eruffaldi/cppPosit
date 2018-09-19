@@ -13,6 +13,7 @@ struct fixedtrait
 	static constexpr int fraction_bits = F;
 };
 
+#ifndef FPGAHLS
 template <class T>
 struct fixedtrait<T,sizeof(T)*8,0>
 {
@@ -21,3 +22,4 @@ struct fixedtrait<T,sizeof(T)*8,0>
 	static constexpr int totalbits = sizeof(T)*8;
 	static constexpr int fraction_bits = 0;
 };
+#endif

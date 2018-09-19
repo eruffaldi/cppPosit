@@ -28,20 +28,6 @@ inline std::ostream & operator << (std::ostream & ons, __int128_t x)
     ons << "cannot print int128";
     return ons;
 }
-
-namespace std
-{
-template <class T>
-T min(T a, T b)
-{
-    return b < a ? b: a;
-}
-template <class T>
-T max(T a, T b)
-{
-    return b > a ? b: a;
-}
-}
 #endif
 
 template<class T>
@@ -78,6 +64,10 @@ struct Unpacked
 	ET exponent = 0; // with sign
 	FT fraction = 0; // this can be 52bit for holding double
 
+    struct single_tag {};
+
+    explicit CONSTEXPR14 Unpacked(single_tag, uint32_t p) { unpack_xfloati<single_trait>(p); }
+
     explicit constexpr Unpacked() {}
 
     // assume regular
@@ -94,8 +84,6 @@ struct Unpacked
         }
     }
 
-	explicit CONSTEXPR14 Unpacked(float p) { unpack_float(p); }
-	explicit CONSTEXPR14 Unpacked(double p) { unpack_double(p); }
     explicit CONSTEXPR14 Unpacked(halffloat p) { unpack_half(p); }
     explicit CONSTEXPR14 Unpacked(int i) { unpack_int(i); }
     explicit CONSTEXPR14 Unpacked(Type t , bool anegativeSign = false): type(t) ,negativeSign(anegativeSign) {};
@@ -109,13 +97,18 @@ struct Unpacked
     // expect 1.xxxxxx otherwise make it 0.xxxxxxxxx
     explicit CONSTEXPR14 Unpacked(ET aexponent, FT afraction, bool anegativeSign ): type(Regular) ,negativeSign(anegativeSign),exponent(aexponent),fraction(afraction)  {}
 
+#ifndef FPGAHLS
+    explicit CONSTEXPR14 Unpacked(float p) { unpack_float(p); }
+    explicit CONSTEXPR14 Unpacked(double p) { unpack_double(p); }
 	CONSTEXPR14 void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
 	CONSTEXPR14 void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
+    constexpr operator float () const { return pack_xfloat<single_trait>(); }
+    constexpr operator double () const { return pack_xfloat<double_trait>(); }
+#endif
+
     CONSTEXPR14 void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
     CONSTEXPR14 Unpacked& unpack_int(int i) { return unpack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(i); }
 
-	constexpr operator float () const { return pack_xfloat<single_trait>(); }
-	constexpr operator double () const { return pack_xfloat<double_trait>(); }
     constexpr operator halffloat() const { return pack_xfloat<half_trait>(); }
     constexpr operator int() const { return pack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(); }
 
@@ -204,13 +197,16 @@ struct Unpacked
         }
 
     }
-	
+
+    /// unpacks a value stored as fixed or integer. Value and holder match	
     template <class Trait>
     CONSTEXPR14 Unpacked& unpack_xfixed(typename Trait::value_t value);
 
+    /// unpacks a floating point value as expressed by its holding type (uint32 for single)
 	template <class Trait>
 	CONSTEXPR14 void unpack_xfloati(typename Trait::holder_t value);
 
+    /// unpacks a floating point value by its value type (single)
     template <class Trait>
     void unpack_xfloat(typename Trait::value_t value) // CANNOT be constexpr, except using the expensive float2bits
     {
@@ -299,6 +295,9 @@ struct Unpacked
                 POSIT_LUTYPE afrac = FT_leftmost_bit | (a.fraction >> 1);
                 POSIT_LUTYPE bfrac = FT_leftmost_bit | (b.fraction >> 1);
                 auto frac = ((((typename nextinttype<FT>::type)afrac) * bfrac) >> FT_bits);
+                #ifdef FPGAHLS
+                #pragma HLS RESOURCE variable=frac core=Mul_LUT
+                #endif
                 bool q = (frac & FT_leftmost_bit) == 0;
                 auto rfrac = q ? (frac << 1): frac;
                 auto exp = a.exponent + b.exponent + (q ? 0: 1);
