@@ -22,7 +22,7 @@
 #include "fixedtraits.hpp"
 #include "typehelpers.hpp"
 
-#ifndef FPGAHLS
+#if !defined(FPGAHLS) && defined(HAS128T)
 inline std::ostream & operator << (std::ostream & ons, __int128_t x)
 {
     ons << "cannot print int128";

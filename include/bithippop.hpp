@@ -9,6 +9,10 @@
 #define FPGAHLS
 #endif
 
+#if defined(__llvm__) && __clang_major__ > 3
+#define HAS_bextr_u64
+#endif
+
 #include <stdint.h>
 #include <type_traits>
 
@@ -102,11 +106,12 @@ inline int findbitleftmost(uint8_t input)
 	return  __lzcnt32(input);
 }
 
-
+/* CSIM
  inline int findbitleftmost(uint64_t input)
 {
 	return  __lzcnt64(input);
 }
+*/
 
 // detect constexpr for X so we can speedup
 #define findbitleftmost(X) (isprvalconstexpr(X)?findbitleftmostC(X):findbitleftmost(X))
@@ -140,10 +145,12 @@ CONSTEXPR14 T bitset_get(T input, int offset, int size)
 	return (input >> offset) & M;
 }
 #if !defined(__arm__) && !defined(FPGAHLS)
+/* CSIM
 inline uint64_t bitset_gethw(uint64_t input, int offset, int size)
 {
 	return _bextr_u64(input, offset, size);
 }
+*/
 
 inline  uint16_t bitset_gethw(uint16_t input, int offset, int size)
 {
@@ -155,11 +162,13 @@ inline  uint32_t bitset_gethw(uint32_t input, int offset, int size)
 	return _bextr_u32(input, offset, size);
 }
 
+#ifdef HAS_bextr_u64
 template <int offset, int size>
 uint64_t bitset_gethwT(uint64_t input)
 {
 	return _bextr_u64(input, offset, size);
 }
+#endif
 
 template <int offset, int size>
 uint32_t bitset_gethwT(uint32_t input)

@@ -7,7 +7,13 @@
 #include <cstdint>
 #include <inttypes.h>
 
+#if defined(__llvm__) && __clang_major__ > 3
+#define HAS128T
+#endif
+
+#ifdef HAS128T
 #define int128_t __int128_t
+#endif
 /// returns the larges type between two
 template <class A,class B>
 using largest_type = typename std::conditional<sizeof(A) >= sizeof(B), A, B>::type;
@@ -17,7 +23,9 @@ using largest_type = typename std::conditional<sizeof(A) >= sizeof(B), A, B>::ty
 namespace detail_least 
 {
 	template< int Category > struct int_least_helper {}; 
+#ifdef HAS128T
 	template<> struct int_least_helper<1> { typedef int128_t least; };
+#endif
 	template<> struct int_least_helper<2> { typedef int64_t least; };
 	template<> struct int_least_helper<3> { typedef int32_t least; };
 	template<> struct int_least_helper<4> { typedef int16_t least; };
@@ -63,11 +71,13 @@ template <class T>
 struct nextinttype
 {};
 
+#ifdef HAS128T
 template <>
 struct nextinttype<uint64_t>
 {
 	using type = __uint128_t;
 };
+#endif
 
 template <>
 struct nextinttype<uint32_t>
@@ -87,11 +97,13 @@ struct nextinttype<uint8_t>
 	using type = uint16_t;
 };
 
+#ifdef HAS128T
 template <>
 struct nextinttype<int64_t>
 {
 	using type = __int128_t;
 };
+#endif
 
 template <>
 struct nextinttype<int32_t>
