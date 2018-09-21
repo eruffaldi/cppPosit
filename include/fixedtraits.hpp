@@ -13,7 +13,7 @@ struct fixedtrait
 	static constexpr int fraction_bits = F;
 };
 
-#ifndef FPGAHLS
+#if 0
 #if __cplusplus >= 201402L
 template <class T>
 struct fixedtrait<T,sizeof(T)*8,0>

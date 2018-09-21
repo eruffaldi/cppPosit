@@ -175,6 +175,21 @@ struct float2trait<double>
 	using type = double;
 	using trait = double_trait;
 };
+
+template <>
+struct float2trait<halffloat>
+{
+	using type = halffloat;
+	using trait = half_trait;
+};
+
+template <>
+struct float2trait<half_traitalt>
+{
+	using type = halffloatalt;
+	using trait = half_traitalt;
+};
+
 #if 0
 
 template <class Trait>

@@ -47,9 +47,9 @@ struct PositTrait
         static constexpr POSIT_UTYPE POSIT_ESP_MASK = (POIST_ONEHELPER<< esbits)-1;
         //POSIT_HOLDER_MSB = 1U<<(POSIT_HOLDER_SIZE-1),
         //POSIT_HOLDER_MASK = ((POSIT_HOLDER_SIZE-1)|(POSIT_HOLDER_SIZE)),
-		static constexpr POSIT_UTYPE POSIT_EXTRA_BITS = POSIT_HOLDER_SIZE-POSIT_SIZE;
-		static constexpr POSIT_UTYPE POSIT_SIGNBIT = (POIST_ONEHELPER<<(POSIT_SIZE-1)); // bit
-		static constexpr POSIT_UTYPE POSIT_INVERTBIT = (POIST_ONEHELPER<<(POSIT_SIZE-2));
+		static constexpr POSIT_UTYPE POSIT_EXTRA_BITS = POSIT_HOLDER_SIZE-totalbits;
+		static constexpr POSIT_UTYPE POSIT_SIGNBIT = (POIST_ONEHELPER<<(totalbits-1)); // bit
+		static constexpr POSIT_UTYPE POSIT_INVERTBIT = (POIST_ONEHELPER<<(totalbits-2));
 
 		static constexpr POSIT_STYPE POSIT_REG_SCALE = 1<<esbits;
 
@@ -89,8 +89,8 @@ struct PositTrait
 		//static constexpr exponenttype maxexponent = withnan_ ? POSIT_REG_SCALE * (POSIT_SIZE - 3) : POSIT_REG_SCALE * (POSIT_SIZE - 2);  // sign+1st rs
 		//static constexpr exponenttype minexponent = (-((exponenttype)POSIT_REG_SCALE) * (POSIT_SIZE - 2))  // sign+1st rs
 
-		static constexpr exponenttype maxexponent() { return withnan_ ? POSIT_REG_SCALE * (POSIT_SIZE - 3) : POSIT_REG_SCALE * (POSIT_SIZE - 2); }
-		static constexpr exponenttype minexponent() { return (-((exponenttype)POSIT_REG_SCALE) * (POSIT_SIZE - 2)) ; }
+		static constexpr exponenttype maxexponent() { return withnan_ ? POSIT_REG_SCALE * (totalbits - 3) : POSIT_REG_SCALE * (totalbits - 2); }
+		static constexpr exponenttype minexponent() { return (-((exponenttype)POSIT_REG_SCALE) * (totalbits - 2)) ; }
 	//enum : exponenttype{
 	//};
     //static constexpr POSIT_UTYPE LMASK(POSIT_UTYPE bits, POSIT_UTYPE size)
@@ -220,6 +220,12 @@ public:
 
 		constexpr operator Posit() const { return pack_posit<T,totalbits,esbits,FT,withnan>(a.unpack()*b.unpack()); }
 
+		// pa.a*pa.b+pb.a*pb.b => 
+		friend constexpr Posit operator+(const PositMul & pa, const PositMul & pb) 
+		{
+			return pack_posit<T,totalbits,esbits,FT,withnan>(pa.a.unpack()*pa.b.unpack()+pb.a.unpack()*pb.b.unpack()); 
+		}
+
 		// missing operators
 		// &
 		// -
@@ -284,7 +290,7 @@ public:
     CONSTEXPR14 explicit Posit(float f): Posit(UnpackedT(f)) {}
 	CONSTEXPR14 explicit Posit(double d): Posit(UnpackedT(d)) {}
 #endif
-	CONSTEXPR14 explicit Posit(int i): Posit(UnpackedT(i)) {}
+	CONSTEXPR14 Posit(int i): Posit(UnpackedT(i)) {}
 
 	constexpr UnpackedT unpack() const { return unpack_posit<T,totalbits,esbits,FT,withnan>(*this); }
 
