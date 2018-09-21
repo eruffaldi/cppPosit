@@ -50,9 +50,9 @@ public:
 
 	explicit posit8(double a);
 	explicit posit8(float a);
-	explicit posit8(int a);
+	posit8(int a);
 	explicit posit8(DeepInit , int8_t a) : v(a) {}
-	explicit posit8() {}
+	posit8(): v(0) {}
 	explicit posit8(FPT x) : v(x.v) {}
 	explicit posit8(UnpackedLow u) : v(FPT(u).v) {}
 	explicit posit8(UnpackedT u) : v(FPT(u).v) {}

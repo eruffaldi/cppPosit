@@ -44,9 +44,9 @@ public:
 
 	explicit posit12(double a);
 	explicit posit12(float a);
-	explicit posit12(int a);
+	posit12(int a);
 	explicit posit12(DeepInit , int16_t a) : v(a) {}
-	explicit posit12() {}
+	posit12(): v(0) {}
 	explicit posit12(FPT x) : v(x.v) {}
 	explicit posit12(UnpackedLow u) : v(FPT(u).v) {}
 	explicit posit12(UnpackedT u) : v(FPT(u).v) {}

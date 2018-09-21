@@ -50,9 +50,9 @@ public:
 
 	explicit posit10(double a);
 	explicit posit10(float a);
-	explicit posit10(int a);
+	posit10(int a);
 	explicit posit10(DeepInit , int16_t a) : v(a) {}
-	explicit posit10() {}
+	posit10() : v(0) {}
 	explicit posit10(FPT x) : v(x.v) {}
 	explicit posit10(UnpackedLow u) : v(FPT(u).v) {}
 	explicit posit10(UnpackedT u) : v(FPT(u).v) {}
