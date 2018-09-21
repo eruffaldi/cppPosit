@@ -271,9 +271,9 @@ public:
 
     static constexpr Posit ldexp(const Posit & u, int exp); // exponent product
 
-	Posit() {}
-
 	using single_tag = typename UnpackedT::single_tag;
+
+	constexpr Posit() : v(0) {}
 
 	CONSTEXPR14 explicit Posit(single_tag t, uint32_t p) { v = pack_posit<T,totalbits,esbits,FT,withnan>(UnpackedT(t,p)).v; }
 
