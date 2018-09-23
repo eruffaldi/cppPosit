@@ -51,10 +51,10 @@ struct any_floattrait
     // many nan ar possible, we pick the one with 
      nan_h = bitmask<holder_t>(exp_bits+1) << (frac_bits-1), // 0 1[e] 1 0[f-1]
      one_h = bitmask<holder_t>(exp_bits-1) << (frac_bits), // 0 0 1[e-1] 0[f]
-     afterone_h = one_h+1, // 0 0 1[e-1] 0[f-1] 1
+     //afterone_h = one_h+1, // 0 0 1[e-1] 0[f-1] 1
      max_h = (bitmask<holder_t>(exp_bits-1) << (frac_bits+1)) | bitmask<holder_t>(frac_bits), // 0 1[e-1] 0 1[f]
-     min_h = 1 << frac_bits, // 0 0[e-1] 1 0[f]
-     two_h = 1 << (exp_bits-1+frac_bits) // 0 1 0[e-1+f]
+     min_h = ((holder_t)(1)) << frac_bits, // 0 0[e-1] 1 0[f]
+     two_h = ((holder_t)(1)) << (exp_bits-1+frac_bits) // 0 1 0[e-1+f]
  };
 };
 
@@ -69,7 +69,7 @@ struct half_traitalt : public any_floattrait<8,7,halffloatalt,uint16_t>
 };
 
 // https://en.wikipedia.org/wiki/16-bit
-struct half_trait : public any_floattrait<5,10,halffloat,uint16_t>
+struct half_trait // : public any_floattrait<5,10,halffloat,uint16_t>
 {
     using value_t = halffloat;
     using holder_t = uint16_t;
@@ -77,9 +77,9 @@ struct half_trait : public any_floattrait<5,10,halffloat,uint16_t>
     static constexpr holder_t pinfinity_h = 0x7C00;
     static constexpr holder_t nan_h = 0x7E00;
     static constexpr holder_t one_h = 0x3C00;
-    static constexpr holder_t two_h = 0x4000;
-    static constexpr holder_t max_h = 0x4000;
-    static constexpr holder_t min_h = 0x4000;
+    static constexpr holder_t two_h = 0x4000; // TODO
+    static constexpr holder_t max_h = 0x7bff; // TODO
+    static constexpr holder_t min_h = 0x7e00; // TODO
 
     static constexpr int data_bits = 16; // can be derived from value_t
     static constexpr int exponent_bits =  5;
@@ -108,8 +108,8 @@ struct single_trait
     static constexpr holder_t nan_h = 0x7fc00000;
     static constexpr holder_t one_h = 0x3f800000;
     static constexpr holder_t two_h = 0x40000000;
-    static constexpr holder_t max_h = 0x4000;
-    static constexpr holder_t min_h = 0x4000;
+    static constexpr holder_t max_h = 0x7f7fffff;
+    static constexpr holder_t min_h = 0x00800000;
 
 	static constexpr int data_bits = 32; // can be derived from value_t
 	static constexpr int exponent_bits =  8;
@@ -137,8 +137,8 @@ struct double_trait
     static constexpr holder_t nan_h = 0x7ff8000000000000ULL;
     static constexpr holder_t one_h = 0x3ff0000000000000ULL;
     static constexpr holder_t two_h = 0x4000000000000000ULL;
-    static constexpr holder_t max_h = 0x4000;
-    static constexpr holder_t min_h = 0x4000;
+    static constexpr holder_t max_h = 0x7fefffffffffffff; // TODO
+    static constexpr holder_t min_h = 0x10000000000000; // TODO
 
 	static constexpr int data_bits = 64; // can be derived from value_t
 	static constexpr int exponent_bits =  11;
@@ -152,18 +152,25 @@ struct double_trait
 #ifdef FLT128_MAX
 // https://en.wikipedia.org/wiki/Quadruple-precision_floating-point_format
 // https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html
-struct double128_trait
+struct float128_trait
 {
 #ifndef FPGAHLS
 	using value_t = __float128;
 #endif
 	using holder_t = unsigned __int128;
+#ifndef FPGAHLS
+	static constexpr value_t zero = 0.0;
+	static constexpr value_t ninfinity = -std::numeric_limits<value_t>::infinity();
+	static constexpr value_t pinfinity = std::numeric_limits<value_t>::infinity();
+#endif
 
     static constexpr holder_t ninfinity_h = 0xb00000000000ffff8000000000000000;
     static constexpr holder_t pinfinity_h = 0x900007f975247fff8000000000000000;
     static constexpr holder_t nan_h = 0xb000000000007fffc000000000000000;
     static constexpr holder_t one_h = 0xd00007f975243fff8000000000000000;
     static constexpr holder_t two_h = 0x40000000000000000000000000000000;
+    static constexpr holder_t max_h = 0x4000; // TODO
+    static constexpr holder_t min_h = 0x4000; // TODO
 
 	static constexpr int data_bits = 128; // can be derived from value_t
 	static constexpr int exponent_bits =  15;
@@ -203,11 +210,20 @@ struct float2trait<halffloat>
 };
 
 template <>
-struct float2trait<half_traitalt>
+struct float2trait<halffloatalt>
 {
 	using type = halffloatalt;
 	using trait = half_traitalt;
 };
+
+#ifdef FLT128_MAX
+template <>
+struct float2trait<__float128>
+{
+	using type = __float128;
+	using trait = float128_trait;
+};
+#endif
 
 #if 0
 

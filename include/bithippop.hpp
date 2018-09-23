@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <type_traits>
+#include <bitset>
 
 #ifndef __arm__
 #include "x86intrin.h"
