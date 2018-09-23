@@ -55,7 +55,10 @@ public:
 	bool has_neg_exponent() const { return (v & 0x400) == 0; }
 	bool is_nan() const { return PT::withnan && v == -2048; }
 	bool is_infinity() const { return PT::withnan ? (v == -2047 || v == 2047) : v == -2048;}
+	static posit12 max() { return posit12(DeepInit(),PT::POSIT_MAXPOS); } // 126 or 127
+	static posit12 min() { return posit12(DeepInit(),1); } //  ? -126 : -127
 	static posit12 one() { return posit12(DeepInit(),0x400); }
+	static posit12 afterone() { return posit12(DeepInit(),0x401); } // 0x40
 	static posit12 onehalf() { return posit12(DeepInit(),0x200); }
 	static posit12 pinfinity() { return posit12(DeepInit(),PT::withnan ? 2047: -2048); }
 	static posit12 ninfinity() { return posit12(DeepInit(),PT::withnan ?-2047: -2048); }
@@ -111,6 +114,16 @@ inline posit12 inv(posit12 x) { return x.inv(); }
 inline posit12 neg(posit12 z) { return -z; }
 
 inline posit12 exp2(posit12 z) { return z.exp2(); }
+
+namespace std {
+    template<> class numeric_limits<posit12> {
+    public:
+       static posit12 max() {return posit12::max(); };
+       static posit12 min() {return posit12::min(); };
+       static posit12 epsilon() {return posit12::afterone()-posit12::one(); };
+        // One can implement other methods if needed
+    };
+}
 
 
 namespace std

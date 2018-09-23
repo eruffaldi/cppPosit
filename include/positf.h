@@ -139,7 +139,7 @@ public:
 	constexpr PositF operator-() const { return neg(); } 
 	constexpr PositF operator~() const { return inv(); } 
 	friend constexpr PositF operator-(const PositF & a, const PositF & b)  { return a + (-b); }
-	friend constexpr PositF operator/(const PositF & a, const PositF & b)  { return pack_posit((FFT)a/(FFT)b); }
+	friend constexpr PositF operator/(const PositF & a, const PositF & b)  { return pack_posit(UnpackedT((FFT)a/(FFT)b)); }
 
 	// max
 	constexpr operator float() const { return unpack(); }

@@ -63,8 +63,9 @@ public:
 	bool is_nan() const { return PT::withnan && v == -512; }
 	bool is_infinity() const { return PT::withnan ? (v == -511 || v == 511) : v == -512;}
 	static posit10 max() { return posit10(DeepInit(),PT::withnan ? 510 : 511); }
-	static posit10 min() { return posit10(DeepInit(),PT::withnan ? -510 : -511); }
+	static posit10 min() { return posit10(DeepInit(),1); }
 	static posit10 one() { return posit10(DeepInit(),0x100); }
+	static posit10 afterone() { return posit10(DeepInit(),0x101); }
 	static posit10 zero() { return posit10(DeepInit(),0); }
 	static posit10 two() { return posit10(DeepInit(),288); }
 	static posit10 onehalf() { return posit10(DeepInit(),0x80); }
@@ -141,6 +142,7 @@ namespace std {
     public:
        static posit10 max() {return posit10::max(); };
        static posit10 min() {return posit10::min(); };
+       static posit10 epsilon() {return posit10::afterone()-posit10::one(); };
         // One can implement other methods if needed
     };
 }

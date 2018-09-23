@@ -62,9 +62,11 @@ public:
 	bool is_nan() const { return PT::withnan && v == PT::POSIT_NAN; }
 	bool is_infinity() const { return (v == PT::POSIT_PINF || v == PT::POSIT_NINF);}
 	static posit8 max() { return posit8(DeepInit(),PT::POSIT_MAXPOS); } // 126 or 127
-	static posit8 min() { return posit8(DeepInit(),PT::POSIT_MINNEG); } //  ? -126 : -127
+	static posit8 min() { return posit8(DeepInit(),1); } //  ? -126 : -127
 	static posit8 one() { return posit8(DeepInit(),PT::POSIT_ONE); } // 0x40
+	static posit8 afterone() { return posit8(DeepInit(),PT::POSIT_ONE+1); } // 0x40
 	static posit8 two() { return posit8(DeepInit(),72); }
+	static posit8 zero() { return posit8(DeepInit(),0); }
 	static posit8 onehalf() { return posit8(DeepInit(),0x20); }
 	static posit8 pinfinity() { return posit8(DeepInit(),PT::POSIT_PINF); } // ? 127: -128); }
 	static posit8 ninfinity() { return posit8(DeepInit(),PT::POSIT_NINF); } //,PT::withnan ?-127: -128); }
@@ -133,6 +135,7 @@ namespace std {
     public:
        static posit8 max() {return posit8::max(); };
        static posit8 min() {return posit8::min(); };
+       static posit8 epsilon() {return posit8::afterone()-posit8::one(); };
         // One can implement other methods if needed
     };
 }
