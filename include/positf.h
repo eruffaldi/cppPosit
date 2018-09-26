@@ -2,6 +2,7 @@
 
 #include "posit.h"
 
+// TODO: make it specialization of Posit natively
 template <class T,int totalbits, int esbits, class FFT, bool withnan>
 class PositF
 {
@@ -178,6 +179,8 @@ public:
 
 };
 
+/*
+NOT WORKING
 template <class T,int totalbits, int esbits, bool withnan>
 class Posit<T,totalbits,esbits,float,withnan>: public PositF<T,totalbits,esbits,float,withnan> 
 {
@@ -191,6 +194,7 @@ class Posit<T,totalbits,esbits,double,withnan>: public PositF<T,totalbits,esbits
 public:
 	using PositF<T,totalbits,esbits,double,withnan>::PositF;
 };
+*/
 
 
 template <class T, int totalbits, int esbits, class FFT, bool withnan>
