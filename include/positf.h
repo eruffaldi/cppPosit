@@ -232,19 +232,55 @@ namespace std
 		return a >= b ? a : b;
 	}
 
-	template <class B,int totalbits, int esbits, class FFT, bool withnan> class numeric_limits<PositF<B,totalbits,esbits,FFT,withnan> > : public std::numeric_limits<Posit<B,totalbits,esbits,typename PositF<B,totalbits,esbits,FFT,withnan>::FT,withnan> > {
+	template <class B,int totalbits, int esbits, class FFT, bool withnan> class numeric_limits<PositF<B,totalbits,esbits,FFT,withnan> > {
 	public:
 	  using T=PositF<B,totalbits,esbits,FFT,withnan>;
 	  using PT=typename T::PT;
-
+	  static constexpr bool is_specialized = true;
 	  static constexpr T min() noexcept { return T::min(); }
 	  static constexpr T max() noexcept { return T::max(); }
 	  static constexpr T lowest() noexcept { return T::lowest	(); }
+	  //static constexpr int  digits = 0; number of digits (in radix base) in the mantissa 
+	  //static constexpr int  digits10 = 0;
+	  static constexpr bool is_signed = true;
+	  static constexpr bool is_integer = false;
+	  static constexpr bool is_exact = false;
+	  static constexpr int radix = 2;
+	  static constexpr T epsilon() noexcept { return T::one().next()-T::one(); }
+	  //static constexpr T round_error() noexcept { return T(); } 
+
+	  // this is also the maximum integer
+	  static constexpr int  min_exponent = PT::minexponent();
+	  // static constexpr int  min_exponent10 = 0;
+	  static constexpr int  max_exponent = PT::maxexponent();
+	  //static constexpr int  max_exponent10 = 0;
+
+	  static constexpr bool has_infinity = true;
+	  static constexpr bool has_quiet_NaN = withnan;
+	  static constexpr bool has_signaling_NaN = false;
+	  //static constexpr float_denorm_style has_denorm = denorm_absent;
+	  static constexpr bool has_denorm_loss = false;
 	  static constexpr T infinity() noexcept { return T::infinity(); }
 	  static constexpr T quiet_NaN() noexcept { return T::nan(); }
 	  //static constexpr T signaling_NaN() noexcept { return T(); }
 	  static constexpr T denorm_min() noexcept { return T::min(); }
-	  
+
+	  static constexpr bool is_iec559 = false;
+	  static constexpr bool is_bounded = false;
+	  static constexpr bool is_modulo = false;
+
+	  static constexpr bool traps = false;
+	  static constexpr bool tinyness_before = false;
+	  //static constexpr float_round_style round_style = round_toward_zero;
+	  /*
+	  round_toward_zero, if it rounds toward zero.
+round_to_nearest, if it rounds to the nearest representable value.
+round_toward_infinity, if it rounds toward infinity.
+round_toward_neg_infinity, if it rounds toward negative infinity.
+round_indeterminate, if the rounding style is indeterminable at compile time.
+*/
+
+
 	};
 
 }
