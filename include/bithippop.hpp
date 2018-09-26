@@ -162,21 +162,13 @@ inline  uint32_t bitset_gethw(uint32_t input, int offset, int size)
 {
 	return _bextr_u32(input, offset, size);
 }
-
-#ifdef HAS_bextr_u64
+//#ifdef HAS_bextr_u64
 template <int offset, int size>
 uint64_t bitset_gethwT(uint64_t input)
 {
 	return _bextr_u64(input, offset, size);
 }
-#else
-template <int offset, int size>
-uint64_t bitset_gethwT(uint64_t input)
-{
-	return bitset_get(input, offset, size);
-}
-
-#endif
+//#endif
 
 template <int offset, int size>
 uint32_t bitset_gethwT(uint32_t input)
