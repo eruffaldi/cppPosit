@@ -236,6 +236,15 @@ namespace std
 	public:
 	  using T=PositF<B,totalbits,esbits,FFT,withnan>;
 	  using PT=typename T::PT;
+
+	  static constexpr T min() noexcept { return T::min(); }
+	  static constexpr T max() noexcept { return T::max(); }
+	  static constexpr T lowest() noexcept { return T::lowest	(); }
+	  static constexpr T infinity() noexcept { return T::infinity(); }
+	  static constexpr T quiet_NaN() noexcept { return T::nan(); }
+	  //static constexpr T signaling_NaN() noexcept { return T(); }
+	  static constexpr T denorm_min() noexcept { return T::min(); }
+	  
 	};
 
 }
