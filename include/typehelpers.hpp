@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <inttypes.h>
 
-#if defined(__llvm__) && __clang_major__ > 3
+#if (defined(__llvm__) && __clang_major__ > 3) || (defined(__GNUC__) && __GNUC__ >= 4)
 #define HAS128T
 #endif
 
