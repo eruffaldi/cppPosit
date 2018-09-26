@@ -169,6 +169,13 @@ uint64_t bitset_gethwT(uint64_t input)
 {
 	return _bextr_u64(input, offset, size);
 }
+#else
+template <int offset, int size>
+uint64_t bitset_gethwT(uint64_t input)
+{
+	return bitset_get(input, offset, size);
+}
+
 #endif
 
 template <int offset, int size>
