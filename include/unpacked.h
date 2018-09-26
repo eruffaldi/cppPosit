@@ -88,10 +88,10 @@ struct Unpacked
     explicit CONSTEXPR14 Unpacked(int i) { unpack_int(i); }
     explicit CONSTEXPR14 Unpacked(Type t , bool anegativeSign = false): type(t) ,negativeSign(anegativeSign) {};
 
-    template <class Trait, typename std::enable_if<std::is_integral<typename Trait::value_t>{},int> = 0> 
+    template <class Trait, typename = typename std::enable_if<std::is_integral<typename Trait::value_t>::value>::type> 
     explicit CONSTEXPR14 Unpacked(typename Trait::value_t i) { unpack_xfixed<Trait>(i); }
 
-    template <class Trait, typename std::enable_if<!std::is_integral<typename Trait::value_t>{},int> = 0> 
+    template <class Trait, typename = typename std::enable_if<!std::is_integral<typename Trait::value_t>::value>::type> 
     explicit CONSTEXPR14 Unpacked(typename Trait::holder_t i) { unpack_xfloat<Trait>(i); }
 
     // expect 1.xxxxxx otherwise make it 0.xxxxxxxxx
