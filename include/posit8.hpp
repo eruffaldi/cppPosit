@@ -10,7 +10,7 @@
 
 #ifndef POSIT8_SPEC
 #define POSIT8_SPEC
-#define POSIT8_ES 2
+#define POSIT8_ES 0
 #define POSIT8_NAN false
 #endif
 
