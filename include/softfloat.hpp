@@ -117,7 +117,7 @@ struct softfloat32
 	explicit softfloat32(float f): value((float_to_f32(f))) {}
 	explicit softfloat32(double f) : value(f64_to_f32(double_to_f64(f))) {}
 	explicit softfloat32(float16_t f): value(f16_to_f32(f)) {}
-	explicit softfloat32(float32_t f): value(f) {}
+	explicit constexpr softfloat32(float32_t f): value(f) {}
 	explicit constexpr softfloat32(bool , uint32_t x): value({x}) {}
 
 	operator float () const { return f32_to_float(value); }
@@ -165,7 +165,6 @@ private:
 
 };
 
-#if 0
 namespace std
 {
 	template <>
@@ -174,7 +173,8 @@ namespace std
 		using TT=single_trait;
 		using T=softfloat32;
 		using FT=float32_t;
-		static constexpr T mk(uint32_t v) { return T(false,v);}
+		//static constexpr T mk(uint32_t v) { return T(false,v);}
+		#define mk(x) T(FT({x}))
 		static constexpr bool is_specialized = true;
 		static constexpr T min() noexcept { return mk(TT::min_h); }
 		static constexpr T max() noexcept { return mk(TT::max_h); }
@@ -185,7 +185,7 @@ namespace std
 		static constexpr bool is_integer = false;
 		static constexpr bool is_exact = false;
 		static constexpr int radix = 2;
-		static constexpr T epsilon() noexcept { return mk((FT)TT::epsilon_h); }
+		static constexpr T epsilon() noexcept { return mk(TT::epsilon_h); }
 		//static constexpr T round_error() noexcept { return T(); } // 0.5f
 
 		// this is also the maximum integer
@@ -210,8 +210,6 @@ namespace std
 
 		static constexpr bool traps = false;
 		static constexpr bool tinyness_before = false;
+		#undef mk
 	};	
 }
-#endif
-
-
