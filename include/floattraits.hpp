@@ -110,6 +110,9 @@ struct single_trait
     static constexpr holder_t two_h = 0x40000000;
     static constexpr holder_t max_h = 0x7f7fffff;
     static constexpr holder_t min_h = 0x00800000;
+    static constexpr holder_t denorm_min_h = 1; // just 1 after 0
+    static constexpr holder_t epsilon_h = 0x34000000; // trickier
+    static constexpr holder_t lowest_h = 0xff7fffff; // -max_h
 
 	static constexpr int data_bits = 32; // can be derived from value_t
 	static constexpr int exponent_bits =  8;

@@ -185,6 +185,15 @@ Eventually it is possible to use cling
 
  cling -D "POSIT_TYPE=Posit<int8_t,8,2,uint8_t>" ".x listposits.cpp"
 
+For loading lbraries:
+
+        #pragma cling add_library_path("path")
+        #pragma cling load("softfloat")
+        #pragma cling add_include_path("inc_directory")
+
+
+
+
 # Constexpr
 
 C++14 allows many operations but it is not possible to efficiently convert constant float to our unpacked (no union availale or reinterpret cast). As shown in fptemplate it is possible to convert to float.
