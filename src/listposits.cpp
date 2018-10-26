@@ -34,10 +34,10 @@ using XT=POSIT_TYPEID;
 #else
 
 #ifndef POSIT_TYPE
-using X1=Posit<int32_t,6,1,uint32_t,false>;
-using X2=Posit<int8_t,8,0,uint8_t,false>;
-using X3=Posit<int16_t,6    ,0,uint8_t,false>;
-using X4=Posit<int8_t,8  ,2,uint8_t,true>;
+using X1=Posit<int32_t,6,1,uint32_t,PositSpec::WithNan>;
+using X2=Posit<int8_t,8,0,uint8_t,PositSpec::WithNan>;
+using X3=Posit<int16_t,6    ,0,uint8_t,PositSpec::WithNan>;
+using X4=Posit<int8_t,8  ,2,uint8_t,PositSpec::WithNanInf>;
 using XT=X4;
 #else
 using XT=Posit<POSIT_TYPE>;

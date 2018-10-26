@@ -8,11 +8,11 @@
 
 namespace Eigen {
 
-template <class T,int totalbits, int esbits, class FT, bool withnan>
-struct NumTraits<Posit<T,totalbits,esbits,FT, withnan> >
- :  GenericNumTraits<Posit<T,totalbits,esbits,FT,withnan> > // permits to get the epsilon, dummy_precision, lowest, highest functions
+template <class T,int totalbits, int esbits, class FT, PositSpec positspec>
+struct NumTraits<Posit<T,totalbits,esbits,FT, positspec> >
+ :  GenericNumTraits<Posit<T,totalbits,esbits,FT,positspec> > // permits to get the epsilon, dummy_precision, lowest, highest functions
 {
-  typedef Posit<T,totalbits,esbits,FT,withnan> P;
+  typedef Posit<T,totalbits,esbits,FT,positspec> P;
 
   typedef P Real;
   typedef P NonInteger;
@@ -70,8 +70,8 @@ struct NumTraits<Unpacked<FT,ET> >
 
 namespace internal {
 
-  template <class T,int totalbits, int esbits, class FT, bool withnan>
-      inline typename Posit<T,totalbits,esbits,FT,withnan>::UnpackedT cast(const Posit<T,totalbits,esbits,FT,withnan>& x)
+  template <class T,int totalbits, int esbits, class FT, PositSpec positspec>
+      inline typename Posit<T,totalbits,esbits,FT,positspec>::UnpackedT cast(const Posit<T,totalbits,esbits,FT,positspec>& x)
     { return x.unpack(); }
 }
 

@@ -4,7 +4,7 @@
  */
  #include "posit.h"
 
-using X=Posit<int32_t,32,0,uint64_t,false> ; // es, total
+using X=Posit<int32_t,32,0,uint64_t,PositSpec::WithNan> ; // es, total
 #include <iostream>
 
 template <class T,class W>

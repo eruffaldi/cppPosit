@@ -3,12 +3,12 @@
 #include "posit.h"
 
 // TODO: make it specialization of Posit natively
-template <class T,int totalbits, int esbits, class FFT, bool withnan>
+template <class T,int totalbits, int esbits, class FFT, PositSpec positspec>
 class PositF
 {
 public:
 	static_assert(std::is_floating_point<FFT>::value,"required floating pointer repr");
-	using PT=PositTrait<T,totalbits,esbits,withnan>;
+	using PT=PositTrait<T,totalbits,esbits,positspec>;
 	//static_assert(float2trait<FFT>::trait::exponent_max <= PT::maxexponent(),"proposed floating is not sufficient for resulting posit max");
 
     enum { vtotalbits = totalbits, vesbits = esbits};
@@ -16,7 +16,7 @@ public:
 	using value_t=T;
     using FT=typename float2trait<FFT>::trait::holder_t;
     using UnpackedT=Unpacked<FT,typename PT::exponenttype>;
-    using PPT=Posit<T,totalbits,esbits,FT,withnan>; // friendly posit
+    using PPT=Posit<T,totalbits,esbits,FT,positspec>; // friendly posit
     using UnpackedLow = UnpackedLow_t<UnpackedT,PT>;
     using fraction_t=FT;
     using exponenttype = typename PT::exponenttype;
@@ -82,8 +82,8 @@ public:
 	PositF inv()  const { return PositF(1/(FFT)unpack());}
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
-    constexpr bool hasNaN() const { return withnan; }
-	constexpr bool isNaN() const { return withnan && v == PT::POSIT_NAN; } 
+    constexpr bool hasNaN() const { return positspec != PositSpec::WithInf; }
+	constexpr bool isNaN() const { return positspec != PositSpec::WithInf && v == PT::POSIT_NAN; } 
 	constexpr bool isnegative() const { return v < 0; } //(v &POSIT_SIGNBIT) != 0; }
 	constexpr bool isinfinity() const { return v == PT::POSIT_PINF || v == PT::POSIT_NINF; }
 	constexpr bool iszero() const { return v == 0; }
@@ -181,35 +181,35 @@ public:
 
 /*
 NOT WORKING
-template <class T,int totalbits, int esbits, bool withnan>
-class Posit<T,totalbits,esbits,float,withnan>: public PositF<T,totalbits,esbits,float,withnan> 
+template <class T,int totalbits, int esbits, PositSpec positspec>
+class Posit<T,totalbits,esbits,float,positspec>: public PositF<T,totalbits,esbits,float,positspec> 
 {
 public:
-	using PositF<T,totalbits,esbits,float,withnan>::PositF;
+	using PositF<T,totalbits,esbits,float,positspec>::PositF;
 };
 
-template <class T,int totalbits, int esbits, bool withnan>
-class Posit<T,totalbits,esbits,double,withnan>: public PositF<T,totalbits,esbits,double,withnan>
+template <class T,int totalbits, int esbits, PositSpec positspec>
+class Posit<T,totalbits,esbits,double,positspec>: public PositF<T,totalbits,esbits,double,positspec>
 {
 public:
-	using PositF<T,totalbits,esbits,double,withnan>::PositF;
+	using PositF<T,totalbits,esbits,double,positspec>::PositF;
 };
 */
 
 
-template <class T, int totalbits, int esbits, class FFT, bool withnan>
-std::ostream & operator << (std::ostream & ons, PositF<T,totalbits,esbits,FFT,withnan> const & o)
+template <class T, int totalbits, int esbits, class FFT, PositSpec positspec>
+std::ostream & operator << (std::ostream & ons, PositF<T,totalbits,esbits,FFT,positspec> const & o)
 {
 	ons << o.unpack();
 	return ons;
 }
 
 
-template <class T, int totalbits, int esbits, class FFT, bool withnan>
-constexpr PositF<T,totalbits,esbits,FFT,withnan> neg(PositF<T,totalbits,esbits,FFT,withnan> x) { return -x; }
+template <class T, int totalbits, int esbits, class FFT, PositSpec positspec>
+constexpr PositF<T,totalbits,esbits,FFT,positspec> neg(PositF<T,totalbits,esbits,FFT,positspec> x) { return -x; }
 
-template <class T, int totalbits, int esbits, class FFT, bool withnan>
-constexpr PositF<T,totalbits,esbits,FFT,withnan> inv(PositF<T,totalbits,esbits,FFT,withnan> x) { return ~x; }
+template <class T, int totalbits, int esbits, class FFT, PositSpec positspec>
+constexpr PositF<T,totalbits,esbits,FFT,positspec> inv(PositF<T,totalbits,esbits,FFT,positspec> x) { return ~x; }
 
 
 
@@ -217,28 +217,28 @@ constexpr PositF<T,totalbits,esbits,FFT,withnan> inv(PositF<T,totalbits,esbits,F
 
 namespace std
 {
-	template <class T,int totalbits, int esbits, class FFT, bool withnan>
-	inline CONSTEXPR14 PositF<T,totalbits,esbits,FFT,withnan> abs(PositF<T,totalbits,esbits,FFT,withnan> z) 
+	template <class T,int totalbits, int esbits, class FFT, PositSpec positspec>
+	inline CONSTEXPR14 PositF<T,totalbits,esbits,FFT,positspec> abs(PositF<T,totalbits,esbits,FFT,positspec> z) 
 	{
-		using PP=PositF<T,totalbits,esbits,FFT,withnan>;
+		using PP=PositF<T,totalbits,esbits,FFT,positspec>;
 		return PP(PP::DeepInit(),z.v < 0 ? -z.v : z.v);
 	}
 
-	template <class T,int totalbits, int esbits, class FFT, bool withnan>
-	inline CONSTEXPR14 PositF<T,totalbits,esbits,FFT,withnan> min(PositF<T,totalbits,esbits,FFT,withnan> a, PositF<T,totalbits,esbits,FFT,withnan> b)
+	template <class T,int totalbits, int esbits, class FFT, PositSpec positspec>
+	inline CONSTEXPR14 PositF<T,totalbits,esbits,FFT,positspec> min(PositF<T,totalbits,esbits,FFT,positspec> a, PositF<T,totalbits,esbits,FFT,positspec> b)
 	{
 		return a <=  b ? a : b;
 	}
 
-	template <class T,int totalbits, int esbits, class FFT, bool withnan>
-	inline CONSTEXPR14 PositF<T,totalbits,esbits,FFT,withnan> max(PositF<T,totalbits,esbits,FFT,withnan> a, PositF<T,totalbits,esbits,FFT,withnan> b)
+	template <class T,int totalbits, int esbits, class FFT, PositSpec positspec>
+	inline CONSTEXPR14 PositF<T,totalbits,esbits,FFT,positspec> max(PositF<T,totalbits,esbits,FFT,positspec> a, PositF<T,totalbits,esbits,FFT,positspec> b)
 	{
 		return a >= b ? a : b;
 	}
 
-	template <class B,int totalbits, int esbits, class FFT, bool withnan> class numeric_limits<PositF<B,totalbits,esbits,FFT,withnan> > {
+	template <class B,int totalbits, int esbits, class FFT, PositSpec positspec> class numeric_limits<PositF<B,totalbits,esbits,FFT,positspec> > {
 	public:
-	  using T=PositF<B,totalbits,esbits,FFT,withnan>;
+	  using T=PositF<B,totalbits,esbits,FFT,positspec>;
 	  using PT=typename T::PT;
 	  static constexpr bool is_specialized = true;
 	  static constexpr T min() noexcept { return T::min(); }
@@ -260,7 +260,7 @@ namespace std
 	  //static constexpr int  max_exponent10 = 0;
 
 	  static constexpr bool has_infinity = true;
-	  static constexpr bool has_quiet_NaN = withnan;
+	  static constexpr bool has_quiet_NaN = positspec != PositSpec::WithInf;
 	  static constexpr bool has_signaling_NaN = false;
 	  //static constexpr float_denorm_style has_denorm = denorm_absent;
 	  static constexpr bool has_denorm_loss = false;

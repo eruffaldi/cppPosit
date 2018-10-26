@@ -16,7 +16,7 @@ uint32_t op2float[4096];
 int main(int argc, char const *argv[])
 {
 	// match the posit16 from posit16.hpp
-	using X=Posit<typename posit12::PT::POSIT_STYPE,12,posit12::PT::POSIT_ESP_SIZE,typename posit12::FT,posit12::PT::withnan>;
+	using X=Posit<typename posit12::PT::POSIT_STYPE,12,posit12::PT::POSIT_ESP_SIZE,typename posit12::FT,posit12::PT::positspec>;
 	union Q {
 		float f;
 		uint32_t i;

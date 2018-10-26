@@ -11,7 +11,7 @@
 #define STR(tok) STR_EXPAND(tok)
 
 
-using X1=Posit<int32_t,28,5,uint32_t,true>;
+using X1=Posit<int32_t,28,5,uint32_t,PositSpec::WithNan>;
 #define X X1
 #define XA "T28_E5 "
 #define SPOSIT "Posit<int32_t,28,5,uint32_t,false>"
@@ -36,7 +36,7 @@ TEST_CASE ("Special Conversion", "")
 {
 	// IEEE32 All integers with 6 or fewer significant decimal digits can be converted to an IEEE 754 floating-point value without loss of precision
 	//using Y1=Posit<int32_t,32,3,uint32_t>;
-	using Y=Posit<int32_t,32,3,uint32_t,false>;
+	using Y=Posit<int32_t,32,3,uint32_t,PositSpec::WithNan>;
 
 	double values1[] = { 3.2e8, 100, 10000, 20000, 1,-1,8.0e7, 4.0e7, 1, -1, -1.6e8};
 	double values[] = { -1.6e8};

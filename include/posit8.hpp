@@ -11,7 +11,7 @@
 #ifndef POSIT8_SPEC
 #define POSIT8_SPEC
 #define POSIT8_ES 0
-#define POSIT8_NAN false
+#define POSIT8_MODE  PositSpec::WithNan
 #endif
 
 #include "posit.h"
@@ -39,9 +39,9 @@ public:
 	static constexpr int vtotalbits = 8;
 	static constexpr int vesbits = POSIT8_ES;
 	using exponenttype=int32_t; 
-	using PT=PositTrait<int8_t,vtotalbits,POSIT8_ES,POSIT8_NAN>;
+	using PT=PositTrait<int8_t,vtotalbits,POSIT8_ES,POSIT8_MODE>;
 	using FT=fraction_t;
-	using FPT=Posit<int8_t,vtotalbits,POSIT8_ES,FT,POSIT8_NAN>;
+	using FPT=Posit<int8_t,vtotalbits,POSIT8_ES,FT,POSIT8_MODE>;
 	using UnpackedLow=typename FPT::UnpackedLow;
 	using UnpackedT=typename FPT::UnpackedT;
 	using info=typename FPT::info;

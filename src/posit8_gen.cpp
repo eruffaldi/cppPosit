@@ -13,7 +13,7 @@
 int main(int argc, char const *argv[])
 {
 	// match the posit8 from posit8.hpp
-	using X=Posit<typename posit8::PT::POSIT_STYPE,8,posit8::PT::POSIT_ESP_SIZE,typename posit8::FT,posit8::PT::withnan>;
+	using X=Posit<typename posit8::PT::POSIT_STYPE,8,posit8::PT::POSIT_ESP_SIZE,typename posit8::FT,posit8::PT::positspec>;
 	union Q {
 		float f;
 		uint32_t i;

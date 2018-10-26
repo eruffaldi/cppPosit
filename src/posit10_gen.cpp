@@ -18,7 +18,7 @@ int16_t opadd[1024*1024],opmul[1024*1024],opdiv[1024*1024];
 int main(int argc, char const *argv[])
 {
 	// match the posit16 from posit16.hpp
-	using X=Posit<typename posit10::PT::POSIT_STYPE,10,posit10::PT::POSIT_ESP_SIZE,typename posit10::FT,posit10::PT::withnan>;
+	using X=Posit<typename posit10::PT::POSIT_STYPE,10,posit10::PT::POSIT_ESP_SIZE,typename posit10::FT,posit10::PT::positspec>;
 	union Q {
 		float f;
 		uint32_t i;

@@ -11,7 +11,7 @@
 #ifndef POSIT8_SPEC
 #define POSIT8_SPEC
 #define POSIT8_ES 2
-#define POSIT8_NAN true
+#define POSIT8_NAN PositSpec::WithNan
 #endif
 
 #include "posit.h"

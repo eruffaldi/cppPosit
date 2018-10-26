@@ -10,7 +10,7 @@
 #ifndef POSIT0_SPEC
 #define POSIT10_SPEC
 #define POSIT10_ES 2
-#define POSIT10_NAN false
+#define POSIT10_MODE PositSpec::WithNan
 #endif
 
 #include <limits>
@@ -39,9 +39,9 @@ public:
 	static constexpr int vtotalbits = 10;
 	static constexpr int vesbits = POSIT10_ES;
 	using exponenttype=int32_t; 
-	using PT=PositTrait<int16_t,vtotalbits,POSIT10_ES,POSIT10_NAN>;
+	using PT=PositTrait<int16_t,vtotalbits,POSIT10_ES,POSIT10_MODE>;
 	using FT=fraction_t;
-	using FPT=Posit<int16_t,vtotalbits,POSIT10_ES,FT,POSIT10_NAN>;
+	using FPT=Posit<int16_t,vtotalbits,POSIT10_ES,FT,POSIT10_MODE>;
 	using UnpackedLow=typename FPT::UnpackedLow;
 	using UnpackedT=typename FPT::UnpackedT;
 	using info=typename FPT::info;

@@ -95,7 +95,7 @@ struct softfloat16
 
 	friend bool operator == (softfloat16 a, softfloat16 b)  { return (f16_eq(a.value,b.value)); }
 	friend bool operator < (softfloat16 a, softfloat16 b)  { return (f16_lt(a.value,b.value)); }
-	friend bool operator > (softfloat16 a, softfloat16 b)  { return (f16_le(b.value,a.value)); }
+	friend bool operator > (softfloat16 a, softfloat16 b)  { return (f16_lt(b.value,a.value)); }
 	friend bool operator >= (softfloat16 a, softfloat16 b)  { return (f16_le(b.value,a.value)); }
 	friend bool operator <= (softfloat16 a, softfloat16 b)  { return (f16_le(a.value,b.value)); }
 
@@ -150,7 +150,7 @@ struct softfloat32
 
 	friend bool operator == (softfloat32 a, softfloat32 b)  { return (f32_eq(a.value,b.value)); }
 	friend bool operator < (softfloat32 a, softfloat32 b)  { return (f32_lt(a.value,b.value)); }
-	friend bool operator > (softfloat32 a, softfloat32 b)  { return (f32_le(b.value,a.value)); }
+	friend bool operator > (softfloat32 a, softfloat32 b)  { return (f32_lt(b.value,a.value)); }
 	friend bool operator >= (softfloat32 a, softfloat32 b)  { return (f32_le(b.value,a.value)); }
 	friend bool operator <= (softfloat32 a, softfloat32 b)  { return (f32_le(a.value,b.value)); }
 
