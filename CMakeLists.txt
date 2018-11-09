@@ -50,7 +50,7 @@ add_executable(testposit tests/testposit.cpp)
 option(POSIT12 "posit12 tabulated" TRUE)
 option(POSIT10 "posit10 tabulated" TRUE)
 option(POSIT8 "posit8 tabulated" TRUE)
-
+option(BINARY8 "binary8_5 tabulated" FALSE)
 if(POSIT12)
   add_executable(posit12_gen src/posit12_gen.cpp)
   set(POSIT12_SRC src/posit12.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/posit12_tbl.cpp)
@@ -75,8 +75,22 @@ if(POSIT8)
   endif()
 endif()
 
-add_library(posittab STATIC ${POSIT8_SRC} ${POSIT10_SRC} ${POSIT12_SRC})
+if(BINARY8)
+  add_executable(binary8_gen src/binary8_gen.cpp)
+  set(BINARY8_SRC src/binary8.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/binary8_tbl.cpp)
+  if(NOT CMAKE_GENERATOR STREQUAL Xcode)
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/binary8_tbl.cpp COMMAND ${CMAKE_CURRENT_BINARY_DIR}/binary8_gen   ${CMAKE_CURRENT_SOURCE_DIR}/src/binary8_tbl.cpp DEPENDS binary8_gen )
+  endif()
+endif()
+
+add_library(posittab STATIC ${POSIT8_SRC} ${BINARY8_SRC} ${POSIT10_SRC} ${POSIT12_SRC})
 set_property(TARGET posittab PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+#if(BINARY8)
+#add_executable(testbinary8 tests/testbinary8.cpp)
+#target_link_libraries(testbinary8 posittab)
+#endif()
+
 
 if(POSIT8)
 add_executable(testposit8 tests/testposit8.cpp)

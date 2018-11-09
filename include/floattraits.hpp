@@ -80,7 +80,8 @@ struct any_floattrait
 };
 
 
-struct microfloat_trait : public any_floattrait<3,4,microfloat,uint8_t>
+// pulp8 alternative
+struct microfloat_trait : public any_floattrait<5,2,microfloat,uint8_t>
 {
 };
 
@@ -98,10 +99,12 @@ struct half_trait // : public any_floattrait<5,10,halffloat,uint16_t>
     static constexpr holder_t ninfinity_h = 0xFC00;
     static constexpr holder_t pinfinity_h = 0x7C00;
     static constexpr holder_t nan_h = 0x7E00;
-    static constexpr holder_t one_h = 0x3C00;
-    static constexpr holder_t two_h = 0x4000; // TODO
-    static constexpr holder_t max_h = 0x7bff; // TODO
-    static constexpr holder_t min_h = 0x7e00; // TODO
+    static constexpr holder_t one_h = 0x3C00; // one next is just + 1
+    static constexpr holder_t two_h = 0x4000; 
+    static constexpr holder_t max_h = 0x7bff; 
+    static constexpr holder_t min_h = 0x0400;
+    // max subnormal 0 00000 1111111111 2−24 ≈ 6.09756 × 10−5
+    // min subnormal 0 00000 0000000001 5.96046 × 10−8
 
     static constexpr int data_bits = 16; // can be derived from value_t
     static constexpr int exponent_bits =  5;

@@ -1,6 +1,9 @@
 // anyfloat_emu: any_floattrait + real float/double + UnpackedT encode/decode ~= 
 //
 // for the case of binary16 see float16native32 based on F16C
+//
+// TODO anyfloat all cpu, missing comparision function of UnpackedT
+// TODO testing of the converrsion functionsd
 #pragma once
 #include <cmath>
 #include <iostream>
