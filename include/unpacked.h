@@ -152,6 +152,12 @@ struct Unpacked
     template <class Trait>
     static constexpr Unpacked make_fixed(typename Trait::value_t x) { return Unpacked().unpack_xfixed<Trait>(x);  }
 
+    template <class Trait>
+    static constexpr Unpacked make_floati(typename Trait::holder_t x) { return Unpacked().unpack_xfloati<Trait>(x);  }
+
+    template <class Trait>
+    static constexpr Unpacked make_float(typename Trait::value_t x) { return Unpacked().unpack_xfloat<Trait>(x);  }
+
 	constexpr bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ? (exponent == u.exponent && fraction == u.fraction) : true); }
 	constexpr bool operator != (const Unpacked & u) const { return !(*this == u); }
     constexpr Unpacked operator-() const { return Unpacked(exponent,fraction,!negativeSign);  }
@@ -470,6 +476,7 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
             type = Zero;
             negativeSign = false;
         }
+        // denormalized
         else
         {
             int k = findbitleftmostC(fraction);
