@@ -11,6 +11,8 @@
 struct halffloat
 {
     uint16_t what;
+    constexpr halffloat(uint16_t w): what(w) {}
+    constexpr halffloat() : what(0) {}
 };
 
 struct halffloatalt
@@ -22,6 +24,25 @@ struct microfloat
 {
     uint8_t what;
 };
+
+/**
+ Casting between differently arbitrary floats requires:
+
+ - exponent:
+ 		oldexponent - oldbias +newbias
+
+ - fraction assumed to be left aligned
+ 		nothing just keep left aligned, only newfraction bits be used
+
+ See:
+	template <class FT,class ET>
+	template <class Trait>
+	CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
+
+	template <class Trait, typename = typename  std::enable_if<!std::is_integral<typename Trait::value_t>::value>::type> 
+    explicit CONSTEXPR14 Unpacked(typename Trait::holder_t i) { unpack_xfloat<Trait>(i); }
+
+ */
 
 
 /// holder_T is an unsigned integer capable of storing 1+exp_bits+frac_bits exactly
@@ -57,6 +78,7 @@ struct any_floattrait
      two_h = ((holder_t)(1)) << (exp_bits-1+frac_bits) // 0 1 0[e-1+f]
  };
 };
+
 
 struct microfloat_trait : public any_floattrait<3,4,microfloat,uint8_t>
 {
@@ -229,7 +251,6 @@ struct float2trait<__float128>
 #endif
 
 #if 0
-
 template <class Trait>
 struct limithelper
 {
@@ -244,7 +265,7 @@ struct limithelper
 	  static constexpr bool is_integer = false;
 	  static constexpr bool is_exact = false;
 	  static constexpr int radix = 2;
-	  static constexpr T epsilon() noexcept { return T::one().next()-T::one(); }
+	  static constexpr T epsilon() noexcept { return T::one_next()-T::one(); }
 	  //static constexpr T round_error() noexcept { return T(); } 
 
 	  // this is also the maximum integer
@@ -270,6 +291,9 @@ struct limithelper
 	  static constexpr bool traps = false;
 	  static constexpr bool tinyness_before = false;
 };
+#endif
+
+#if 0
 
 namespace std
 {

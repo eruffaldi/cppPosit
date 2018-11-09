@@ -54,6 +54,8 @@ inline double f64_to_double(float64_t i)
 
 struct softfloat16
 {
+	using trait_t = half_trait;
+	using value_t= float16_t;
 	explicit softfloat16() {}
 	explicit softfloat16(uint32_t f): value(ui32_to_f16(f)) {}
 	explicit softfloat16(int32_t f): value(i32_to_f16(f)) {}
@@ -111,6 +113,8 @@ private:
 
 struct softfloat32
 {
+	using trait_t = single_trait;
+	using value_t= float32_t;
 	explicit softfloat32() {}
 	explicit softfloat32(uint32_t f): value(ui32_to_f32(f)) {}
 	explicit softfloat32(int32_t f): value(i32_to_f32(f)) {}

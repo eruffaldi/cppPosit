@@ -62,7 +62,7 @@ struct Unpacked
 	Type type = Regular;
 	bool negativeSign = false;
 	ET exponent = 0; // with sign
-	FT fraction = 0; // this can be 52bit for holding double
+	FT fraction = 0; // this can be 52bit for holding double.
 
     struct single_tag {};
 
@@ -479,6 +479,14 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
 	}
 }
 
+template <class SourceTrait, class DestTrait, class frac_t>
+typename DestTrait::holder_t cast_any_float(typename SourceTrait::holder_t q)
+{
+    Unpacked<frac_t,int> u;
+    u.template unpack_xfloati<SourceTrait>(q);
+    return u.template pack_xfloati<DestTrait>();
+
+}
 template <int abits, class AT, int bbits, class BT, bool abits_gt_bbits, AT msb>
 struct fraction_bit_extract
 {
