@@ -167,7 +167,7 @@ struct Unpacked
 	constexpr bool operator != (const Unpacked & u) const 
     { 
         // nan != nan ALWAYS
-        return type == NaN || u.type == NaN ? true : (*this = u);
+        return type == NaN || u.type == NaN ? true : (*this == u);
     }
 
     constexpr Unpacked operator-() const { return Unpacked(exponent,fraction,!negativeSign);  }
