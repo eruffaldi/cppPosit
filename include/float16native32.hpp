@@ -34,7 +34,7 @@ inline float16n_t float32to16n(float x)
 	// _mm_cvtsi128_si32(x) &0xFFFF  with cost (2,1)
 	// 		or
 	// _mm_extract(x,0)  cost (3,1)
-	return float16n_t(_mm_cvtsi128_si32(_mm_cvtps_ph( _mm_set_ps1 (x),_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC )) & 0xFFFF);
+	return float16n_t((uint16_t)(_mm_cvtsi128_si32(_mm_cvtps_ph( _mm_set_ps1 (x),_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC )) & 0xFFFF));
 }
 
 #else
