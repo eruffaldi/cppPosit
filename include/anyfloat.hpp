@@ -32,7 +32,7 @@ public:
 	anyfloat_emu half() const { return anyfloat_emu(0.5*(FFT)*this); }
 	anyfloat_emu twice() const { return anyfloat_emu(2*(FFT)*this); }
 
-	anyfloat_emu() {}
+	anyfloat_emu() : v(0) {}
  
 	/// unpack value, then repack as implementation type 
 	/// NOTE: some conversions could be done quicker: e.g. between native types or float16 if AVX available

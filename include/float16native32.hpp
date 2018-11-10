@@ -62,7 +62,7 @@ struct float16n32
 {
 	using trait_t = half_trait;
 	using value_t= float16n_t;
-	explicit float16n32() {}
+	explicit float16n32() : value (0) {}
 	explicit float16n32(float f): value(float32to16n(f)) {}
 	explicit float16n32(float16n_t f): value(f) {}
 	explicit constexpr float16n32(bool , uint16_t x): value(x) {}
