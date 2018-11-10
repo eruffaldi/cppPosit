@@ -62,6 +62,7 @@ constexpr uint32_t float2bits(float f)
 }
 
 #if 0
+// GENERALIZE for double 
 template <class float_trait>
 constexpr typename float_trait::holder_t float2bitsx(typename float_trait::value_t f) 
 { 

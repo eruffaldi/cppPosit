@@ -7,42 +7,26 @@
 #define FPGAHLS
 #endif
 
-
-struct halffloat
+// wrapper for custom floats holdi
+template <class T>
+struct valuewrap
 {
-    uint16_t what;
-    constexpr halffloat(uint16_t w): what(w) {}
-    constexpr halffloat() : what(0) {}
+	T what;
+    constexpr valuewrap(T w): what(w) {}
+    constexpr valuewrap() : what(0) {}
 };
 
-struct halffloatalt
+struct halffloat : public valuewrap<uint16_t>
 {
-    uint16_t what;
 };
 
-struct microfloat
+struct halffloatalt : public valuewrap<uint16_t>
 {
-    uint8_t what;
 };
 
-/**
- Casting between differently arbitrary floats requires:
-
- - exponent:
- 		oldexponent - oldbias +newbias
-
- - fraction assumed to be left aligned
- 		nothing just keep left aligned, only newfraction bits be used
-
- See:
-	template <class FT,class ET>
-	template <class Trait>
-	CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
-
-	template <class Trait, typename = typename  std::enable_if<!std::is_integral<typename Trait::value_t>::value>::type> 
-    explicit CONSTEXPR14 Unpacked(typename Trait::holder_t i) { unpack_xfloat<Trait>(i); }
-
- */
+struct microfloat : public valuewrap<uint8_t>
+{
+};
 
 
 /// holder_T is an unsigned integer capable of storing 1+exp_bits+frac_bits exactly
@@ -210,6 +194,26 @@ struct float128_trait
 };
 
 #endif
+
+/**
+ Casting between differently arbitrary floats requires:
+
+ - exponent:
+ 		oldexponent - oldbias +newbias
+
+ - fraction assumed to be left aligned
+ 		nothing just keep left aligned, only newfraction bits be used
+
+ See:
+	template <class FT,class ET>
+	template <class Trait>
+	CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
+
+	template <class Trait, typename = typename  std::enable_if<!std::is_integral<typename Trait::value_t>::value>::type> 
+    explicit CONSTEXPR14 Unpacked(typename Trait::holder_t i) { unpack_xfloat<Trait>(i); }
+
+ */
+
 
 
 template <class T>

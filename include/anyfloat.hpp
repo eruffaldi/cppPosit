@@ -2,8 +2,8 @@
 //
 // for the case of binary16 see float16native32 based on F16C
 //
-// TODO anyfloat all cpu, missing comparision function of UnpackedT
-// TODO testing of the converrsion functionsd
+// TODO anyfloat non emu: missing comparision function of UnpackedT
+// TODO testing of the converrsion functions
 #pragma once
 #include <cmath>
 #include <iostream>
@@ -24,6 +24,7 @@ public:
 	using exponenttype=int;
 	using trait_t=any_floattrait<expbits,fractionbits,value_t,holder_t>;
 	using FFT=impl_t; // float or double
+	using impl_trait = typename float2trait<impl_t>::trait ; 
     using UnpackedT=Unpacked<holder_t,exponenttype>;
 	
 	T v; // index in the N2 space
@@ -32,6 +33,10 @@ public:
 	anyfloat_emu twice() const { return anyfloat_emu(2*(FFT)*this); }
 
 	anyfloat_emu() {}
+ 
+	/// unpack value, then repack as implementation type 
+	/// NOTE: some conversions could be done quicker: e.g. between native types or float16 if AVX available
+	operator FFT () { return UnpackedT::template make_floati<trait_t>(v).template pack_xfloat<impl_trait>(); }
 
     friend constexpr bool operator == (const anyfloat_emu & a, const anyfloat_emu & u)  { return (FFT)a == (FFT)u; }
     friend constexpr bool operator != (const anyfloat_emu & a, const anyfloat_emu & u)  { return (FFT)a  != (FFT)u; }
@@ -42,11 +47,11 @@ public:
 
     static constexpr anyfloat_emu ldexp(const anyfloat_emu & u, int exp); // exponent product
 
-    CONSTEXPR14 explicit anyfloat_emu(float f) { v = pack_posit(UnpackedT(f)).v;  }
-	CONSTEXPR14 explicit anyfloat_emu(double d) { v = pack_posit(UnpackedT(d)).v;  }
-	CONSTEXPR14 explicit anyfloat_emu(int f) { v = pack_posit(UnpackedT((double)f)).v; }
+    CONSTEXPR14 explicit anyfloat_emu(float f) : v(UnpackedT(f).template pack_xfloati<trait_t>()) {}
+	CONSTEXPR14 explicit anyfloat_emu(double d) : v(UnpackedT(d).template pack_xfloati<trait_t>()) {}
+	CONSTEXPR14 explicit anyfloat_emu(int i) : v(UnpackedT(i).template pack_xfloati<trait_t>()) {}
 	CONSTEXPR14 explicit anyfloat_emu(DeepInit, T x) : v(x) {} 
-	CONSTEXPR14 explicit anyfloat_emu(UnpackedT u) : v(pack_posit(u).v) {} 
+	CONSTEXPR14 explicit anyfloat_emu(UnpackedT u) : v(u.template pack_floati<trait_t>) {}
 	//CONSTEXPR14 explicit anyfloat_emu(UnpackedLow u) : v(pack_low(u).v) {} 
 
 	constexpr UnpackedT unpack() const { return UnpackedT::template make_floati<trait_t>(v); }
@@ -136,6 +141,13 @@ public:
 	}
 
 };
+
+
+using binary8_emu = anyfloat_emu<5,2,microfloat,uint8_t,float>;
+using binary16alt_emu = anyfloat_emu<8,7,halffloatalt,uint16_t,float>;
+using binary16_emu = anyfloat_emu<5,10,halffloat,uint16_t,float>;
+using binary32_emu = anyfloat_emu<8,23,float,uint32_t,float>;
+using binary64_emu = anyfloat_emu<11,52,double,uint64_t,double>;
 
 namespace std
 {

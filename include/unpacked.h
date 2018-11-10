@@ -100,13 +100,13 @@ struct Unpacked
 #ifndef FPGAHLS
     explicit CONSTEXPR14 Unpacked(float p) { unpack_float(p); }
     explicit CONSTEXPR14 Unpacked(double p) { unpack_double(p); }
-	CONSTEXPR14 void unpack_float(float f) { unpack_xfloat<single_trait>(f); }
-	CONSTEXPR14 void unpack_double(double d) { unpack_xfloat<double_trait>(d); }
+	CONSTEXPR14 Unpacked & unpack_float(float f) { return unpack_xfloat<single_trait>(f); }
+	CONSTEXPR14 Unpacked & unpack_double(double d) { return unpack_xfloat<double_trait>(d); }
     constexpr operator float () const { return pack_xfloat<single_trait>(); }
     constexpr operator double () const { return pack_xfloat<double_trait>(); }
 #endif
 
-    CONSTEXPR14 void unpack_half(halffloat d) { unpack_xfloat<half_trait>(d); }
+    CONSTEXPR14 Unpacked& unpack_half(halffloat d) { return unpack_xfloat<half_trait>(d); }
     CONSTEXPR14 Unpacked& unpack_int(int i) { return unpack_xfixed<fixedtrait<int,sizeof(int)*8,0> >(i); }
 
     constexpr operator halffloat() const { return pack_xfloat<half_trait>(); }
@@ -158,8 +158,18 @@ struct Unpacked
     template <class Trait>
     static constexpr Unpacked make_float(typename Trait::value_t x) { return Unpacked().unpack_xfloat<Trait>(x);  }
 
-	constexpr bool operator == (const Unpacked & u) const { return negativeSign == u.negativeSign && type == u.type && (type == Regular ? (exponent == u.exponent && fraction == u.fraction) : true); }
-	constexpr bool operator != (const Unpacked & u) const { return !(*this == u); }
+	constexpr bool operator == (const Unpacked & u) const 
+    { 
+        // nan != nan ALWAYS
+        return type == NaN || u.type == NaN ? false : negativeSign == u.negativeSign && type == u.type && (type == Regular ? (exponent == u.exponent && fraction == u.fraction) : true); 
+    }
+
+	constexpr bool operator != (const Unpacked & u) const 
+    { 
+        // nan != nan ALWAYS
+        return type == NaN || u.type == NaN ? true : (*this = u);
+    }
+
     constexpr Unpacked operator-() const { return Unpacked(exponent,fraction,!negativeSign);  }
 
     CONSTEXPR14 Unpacked inv() const
@@ -210,18 +220,18 @@ struct Unpacked
 
     /// unpacks a floating point value as expressed by its holding type (uint32 for single)
 	template <class Trait>
-	CONSTEXPR14 void unpack_xfloati(typename Trait::holder_t value);
+	CONSTEXPR14 Unpacked& unpack_xfloati(typename Trait::holder_t value);
 
     /// unpacks a floating point value by its value type (single)
     template <class Trait>
-    void unpack_xfloat(typename Trait::value_t value) // CANNOT be constexpr, except using the expensive float2bits
+    Unpacked & unpack_xfloat(typename Trait::value_t value) // CANNOT be constexpr, except using the expensive float2bits
     {
         union {
             typename Trait::holder_t i;
             typename Trait::value_t  f; 
         } uu;
         uu.f = value;
-        unpack_xfloati<Trait>(uu.i);
+        return unpack_xfloati<Trait>(uu.i);
     }
 
     CONSTEXPR14 friend Unpacked operator - (Unpacked a, Unpacked b)
@@ -286,6 +296,7 @@ struct Unpacked
                 return (a.negativeSign == b.negativeSign)? a : nan();
         }
     }
+
 
     // https://www.edwardrosten.com/code/fp_template.html
     // https://github.com/Melown/half
@@ -434,7 +445,7 @@ CONSTEXPR14 Unpacked<FT,ET> & Unpacked<FT,ET>::unpack_xfixed(typename Trait::val
 // https://www.h-schmidt.net/FloatConverter/IEEE754.html
 template <class FT, class ET>
 template <class Trait>
-CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
+CONSTEXPR14 Unpacked<FT,ET> &Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
 {
     ET rawexp = bitset_getT(value,Trait::fraction_bits,Trait::exponent_bits) ;
 	type = Regular;
@@ -460,12 +471,10 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
 		if(fraction == 0)
 		{
 			type = Infinity;
-			return;
 		}
 		else
 		{
 			type = NaN;
-			return;
 		}
 	}
 	else if (rawexp == 0)
@@ -484,16 +493,9 @@ CONSTEXPR14 void Unpacked<FT,ET>::unpack_xfloati(typename Trait::holder_t value)
             fraction <<= (k+1);
         }
 	}
+    return *this;
 }
 
-template <class SourceTrait, class DestTrait, class frac_t>
-typename DestTrait::holder_t cast_any_float(typename SourceTrait::holder_t q)
-{
-    Unpacked<frac_t,int> u;
-    u.template unpack_xfloati<SourceTrait>(q);
-    return u.template pack_xfloati<DestTrait>();
-
-}
 template <int abits, class AT, int bbits, class BT, bool abits_gt_bbits, AT msb>
 struct fraction_bit_extract
 {
@@ -628,4 +630,10 @@ CONSTEXPR14 typename Trait::holder_t Unpacked<FT,ET>::pack_xfloati() const
 		value++;
 	}
 	return value;
+}
+
+template <class SrcTrait, class DstTrait, class FT>
+constexpr typename DstTrait::holder_t convertfloats(typename SrcTrait::holder_t src)
+{
+    return Unpacked<typename largest_type<typename SrcTrait::holder_t,typename DstTrait::holder_t>::type,int>::template make_floati<SrcTrait>(src).template pack_xfloati<DstTrait>();    
 }

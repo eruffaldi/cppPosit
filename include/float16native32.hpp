@@ -39,20 +39,19 @@ inline float16n_t float32to16n(float x)
 
 #else
 
-// use our unpacked version that uses the traits
+// TODO unpacked version seems having problems
+// TODO constexpr reqiures floatconst2bits.hpp
 
 inline float float16nto32(float16n_t x)
 {	
-    Unpacked<uint32_t,int> u;
-    u.unpack_xfloati<half_trait>(x.what);
-    return u.pack_xfloati<single_trait>();
+	// template <class SrcTrait, class DstTrait, class FT>
+	// constexpr DstTrait::holder_t convertfloats(SrcTrait::holder_t src)
+    return Unpacked<uint32_t,int>::template make_floati<half_trait>(x.what).template pack_floati<single_trait>();
 }
 
 inline float16n_t float32to16n(float x)
 {
-    Unpacked<uint32_t,int> u;
-    u.unpack_xfloat<single_trait>(x);
-    return float16n_t(u.pack_xfloati<half_trait>());
+    return Unpacked<uint32_t,int>::template make_float<single_trait>(x).template pack_floati<half_trait>();
 }
 
 
