@@ -46,12 +46,12 @@ inline float float16nto32(float16n_t x)
 {	
 	// template <class SrcTrait, class DstTrait, class FT>
 	// constexpr DstTrait::holder_t convertfloats(SrcTrait::holder_t src)
-    return Unpacked<uint32_t,int>::template make_floati<half_trait>(x.what).template pack_floati<single_trait>();
+    return Unpacked<uint32_t,int>::template make_floati<half_trait>(x.what).template pack_xfloati<single_trait>();
 }
 
 inline float16n_t float32to16n(float x)
 {
-    return Unpacked<uint32_t,int>::template make_float<single_trait>(x).template pack_floati<half_trait>();
+    return float16n_t(Unpacked<uint32_t,int>::template make_float<single_trait>(x).template pack_xfloati<half_trait>());
 }
 
 

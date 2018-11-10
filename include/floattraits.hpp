@@ -18,14 +18,17 @@ struct valuewrap
 
 struct halffloat : public valuewrap<uint16_t>
 {
+	using valuewrap<uint16_t>::valuewrap;
 };
 
 struct halffloatalt : public valuewrap<uint16_t>
 {
+	using valuewrap<uint16_t>::valuewrap;
 };
 
 struct microfloat : public valuewrap<uint8_t>
 {
+	using valuewrap<uint8_t>::valuewrap;
 };
 
 
