@@ -57,8 +57,8 @@ public:
 
 	constexpr UnpackedT unpack() const { return UnpackedT::template make_floati<trait_t>(v); }
 
-	constexpr anyfloat_emu abs()  const { return anyfloat_emu(DeepInit(),v & ~signbit);  }  // could be >= infinity because infinity is sign symmetric
-	constexpr anyfloat_emu neg()  const { return anyfloat_emu(DeepInit(),v ^ signbit); }; 
+	constexpr anyfloat_emu abs()  const { return anyfloat_emu(DeepInit(),v & ~trait_t::signbit);  }  // could be >= infinity because infinity is sign symmetric
+	constexpr anyfloat_emu neg()  const { return anyfloat_emu(DeepInit(),v ^ trait_t::signbit); }; 
 	anyfloat_emu inv()  const { return anyfloat_emu(1/(FFT)*this);}
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
@@ -155,8 +155,7 @@ namespace std
 	template <int expbits, int fractionbits, class value_t, class holder_t, class impl_t>
 	inline CONSTEXPR14 anyfloat_emu<expbits,fractionbits,value_t,holder_t,impl_t> abs(anyfloat_emu<expbits,fractionbits,value_t,holder_t,impl_t> z) 
 	{
-		using PP=anyfloat_emu<expbits,fractionbits,value_t,holder_t,impl_t>;
-		return PP(PP::DeepInit(),z.v < 0 ? -z.v : z.v);
+		return z.abs();
 	}
 
 	template <int expbits, int fractionbits, class value_t, class holder_t, class impl_t>

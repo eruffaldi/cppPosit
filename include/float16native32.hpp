@@ -73,11 +73,13 @@ struct float16n32
 	operator float16n_t() const { return value; }
 
 	uint16_t raw() const { return value.what; }
+	constexpr float16n32 abs()  const { return float16n32(0,value.what & ~0x8000);  }  // could be >= infinity because infinity is sign symmetric
+	constexpr float16n32 neg()  const { return float16n32(0,value.what ^ 0x8000); }; 
 
 	/// replace them with constants
-	static float16n32 two() { return float16n_t(trait_t::two_h); };
-	static float16n32 one() { return float16n_t(trait_t::one_h); };
-	static float16n32 zero() { return float16n_t(0); };
+	static float16n32 two() { return float16n32(false,trait_t::two_h); };
+	static float16n32 one() { return float16n32(false,trait_t::one_h); };
+	static float16n32 zero() { return float16n32(false,0); };
 
 	friend float16n32 operator+ (float16n32 a, float16n32 b)  { return float16n32((impl_t)a+(impl_t)b); }
 	friend float16n32 operator- (float16n32 a, float16n32 b)  { return float16n32((impl_t)a-(impl_t)b); }
@@ -86,7 +88,7 @@ struct float16n32
 	float16n32 & operator+=(const float16n32 &a) { float16n32 x = *this + a; value = x.value; return *this; }
 	float16n32 & operator*=(const float16n32 &a) { float16n32 x = *this * a; value = x.value; return *this; }
 
-	float16n32 operator-() const {		return float16n_t(value.what ^ 0x8000); 	}
+	float16n32 operator-() const {		return neg(); }
 
 	friend float16n32 rem(float16n32 a,float16n32 b)  { return float16n32(remainder((impl_t)a,(impl_t)b));  }
 	friend float16n32 sqrt(float16n32 a) { return float16n32(sqrt((impl_t)a));  }
@@ -111,6 +113,14 @@ struct float16n32
 private:
 	value_t value;
 };
+
+namespace std
+{
+	inline CONSTEXPR14 float16n32 abs(float16n32 z)
+	{
+		return z.abs();
+	}
+}
 
 #if 0
 namespace std
