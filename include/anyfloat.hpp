@@ -16,6 +16,7 @@ public:
     enum { totalbits = expbits+fractionbits+1, vtotalbits = totalbits, vexpbits = expbits};
 	struct DeepInit{};
 
+	static_assert(std::is_unsigned<holder_t>::value,"anyfloat_emu works with unsigned holders");
 	static_assert(totalbits <= sizeof(holder_t)*8,"not enough bits in holder");
 
 	// MAYBE: check that impl_t has enough mantissa and exponent
@@ -56,14 +57,14 @@ public:
 
 	constexpr UnpackedT unpack() const { return UnpackedT::template make_floati<trait_t>(v); }
 
-	constexpr anyfloat_emu abs()  const { return anyfloat_emu(DeepInit(),(v < 0 ? -v : v));  }  // could be >= infinity because infinity is sign symmetric
-	constexpr anyfloat_emu neg()  const { return anyfloat_emu(DeepInit(),-v); }; 
+	constexpr anyfloat_emu abs()  const { return anyfloat_emu(DeepInit(),v & ~signbit);  }  // could be >= infinity because infinity is sign symmetric
+	constexpr anyfloat_emu neg()  const { return anyfloat_emu(DeepInit(),v ^ signbit); }; 
 	anyfloat_emu inv()  const { return anyfloat_emu(1/(FFT)*this);}
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
     constexpr bool hasNaN() const { return true; }
 	//constexpr bool isNaN() const { return v ==  && v == trait_t::POSIT_NAN; } 
-	constexpr bool isnegative() const { return v < 0; } //(v &POSIT_SIGNBIT) != 0; }
+	constexpr bool isnegative() const { return (v & signbit) != 0; } //(v &POSIT_SIGNBIT) != 0; }
 	//constexpr bool isinfinity() const { return v == trait_t::POSIT_PINF || v == trait_t::POSIT_NINF; }
 	constexpr bool iszero() const { return v == 0; }
 	//constexpr bool isone() const { return v == trait_t::POSIT_ONE; }

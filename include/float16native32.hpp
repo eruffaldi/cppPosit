@@ -41,7 +41,7 @@ inline float16n_t float32to16n(float x)
 
 // TODO unpacked version seems having problems
 // TODO constexpr reqiures floatconst2bits.hpp
-
+// TODO: use 
 inline float float16nto32(float16n_t x)
 {	
 	// template <class SrcTrait, class DstTrait, class FT>
@@ -62,6 +62,7 @@ struct float16n32
 {
 	using trait_t = half_trait;
 	using value_t= float16n_t;
+	using impl_t = float;
 	explicit float16n32() : value (0) {}
 	explicit float16n32(float f): value(float32to16n(f)) {}
 	explicit float16n32(float16n_t f): value(f) {}
@@ -69,45 +70,41 @@ struct float16n32
 
 	operator float () const { return float16nto32(value); }
 	operator double () const { return float16nto32(value); }
-	operator float16n_t() const { return float16n_t(value.what); }
+	operator float16n_t() const { return value; }
 
 	uint16_t raw() const { return value.what; }
 
 	/// replace them with constants
-	static float16n32 two() { return float16n32(false,trait_t::two_h); };
-	static float16n32 one() { return float16n32(false,trait_t::one_h); };
-	static float16n32 zero() { return float16n32(false,0); };
+	static float16n32 two() { return float16n_t(trait_t::two_h); };
+	static float16n32 one() { return float16n_t(trait_t::one_h); };
+	static float16n32 zero() { return float16n_t(0); };
 
-	friend float16n32 operator+ (float16n32 a, float16n32 b)  { return float16n32((float)a+(float)b); }
-	friend float16n32 operator- (float16n32 a, float16n32 b)  { return float16n32((float)a-(float)b); }
-	friend float16n32 operator* (float16n32 a, float16n32 b)  { return float16n32((float)a*(float)b); }
-	friend float16n32 operator/ (float16n32 a, float16n32 b)  { return float16n32((float)a/(float)b); }
+	friend float16n32 operator+ (float16n32 a, float16n32 b)  { return float16n32((impl_t)a+(impl_t)b); }
+	friend float16n32 operator- (float16n32 a, float16n32 b)  { return float16n32((impl_t)a-(impl_t)b); }
+	friend float16n32 operator* (float16n32 a, float16n32 b)  { return float16n32((impl_t)a*(impl_t)b); }
+	friend float16n32 operator/ (float16n32 a, float16n32 b)  { return float16n32((impl_t)a/(impl_t)b); }
 	float16n32 & operator+=(const float16n32 &a) { float16n32 x = *this + a; value = x.value; return *this; }
 	float16n32 & operator*=(const float16n32 &a) { float16n32 x = *this * a; value = x.value; return *this; }
 
-	float16n32 operator-() const {
-		float16n_t a = value;
-		a.what ^= 0x8000;
-		return float16n32(a);
-	}
+	float16n32 operator-() const {		return float16n_t(value.what ^ 0x8000); 	}
 
-	friend float16n32 rem(float16n32 a,float16n32 b)  { return float16n32(remainder((float)a,(float)b));  }
-	friend float16n32 sqrt(float16n32 a) { return float16n32(sqrt((float)a));  }
-	friend float16n32 mulAdd(float16n32 a, float16n32 b, float16n32 c) { return float16n32((float)a*(float)b+(float)c); }
+	friend float16n32 rem(float16n32 a,float16n32 b)  { return float16n32(remainder((impl_t)a,(impl_t)b));  }
+	friend float16n32 sqrt(float16n32 a) { return float16n32(sqrt((impl_t)a));  }
+	friend float16n32 mulAdd(float16n32 a, float16n32 b, float16n32 c) { return float16n32((impl_t)a*(impl_t)b+(impl_t)c); }
 
 	friend float16n32 half(float16n32 a) { return a/two(); }
 	friend float16n32 square(float16n32 a) { return a*a; }
 	friend float16n32 inv(float16n32 a) { return one()/a; }
 
-	friend bool operator == (float16n32 a, float16n32 b)  { return ((float)a==(float)b); }
-	friend bool operator < (float16n32 a, float16n32 b)  { return ((float)a<(float)b); }
-	friend bool operator > (float16n32 a, float16n32 b)  { return ((float)a>(float)b); }
-	friend bool operator >= (float16n32 a, float16n32 b)  { return ((float)a>=(float)b); }
-	friend bool operator <= (float16n32 a, float16n32 b)  { return ((float)a<=(float)b); }
+	friend bool operator == (float16n32 a, float16n32 b)  { return ((impl_t)a==(impl_t)b); }
+	friend bool operator < (float16n32 a, float16n32 b)  { return ((impl_t)a<(impl_t)b); }
+	friend bool operator > (float16n32 a, float16n32 b)  { return ((impl_t)a>(impl_t)b); }
+	friend bool operator >= (float16n32 a, float16n32 b)  { return ((impl_t)a>=(impl_t)b); }
+	friend bool operator <= (float16n32 a, float16n32 b)  { return ((impl_t)a<=(impl_t)b); }
 
 	friend std::ostream & operator << (std::ostream & ons, const float16n32 & v)
 	{
-		ons << "f16(" << ((float)v) << ")";
+		ons << "f16(" << ((impl_t)v) << ")";
 		return ons;
 	}
 

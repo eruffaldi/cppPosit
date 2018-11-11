@@ -220,5 +220,28 @@ constexpr C++14 (not used yet)
 https://github.com/elbeno/constexpr
 
 
-FP16<->Integer 
+FP16<->Integer or <-> Float
 https://github.com/Maratyszcza/FP16
+https://fgiesen.wordpress.com/2012/03/28/half-to-float-done-quic/
+https://gist.github.com/rygorous/2156668
+
+# References
+
+FP Guide
+        https://floating-point-gui.de/
+
+Blinn Tricks
+        https://ieeexplore.ieee.org/document/595279
+        also on p123 of https://files.cnblogs.com/files/mavaL/blinn.pdf
+Blog
+        https://randomascii.wordpress.com/2012/01/11/tricks-with-the-floating-point-format/
+        https://randomascii.wordpress.com/2012/01/23/stupid-float-tricks-2/
+
+What everybody shohuld know about FP
+        http://www.physics.mcgill.ca/~patscott/teaching/numeric/Goldberg.pdf
+
+Slides
+        http://www.it.uu.se/edu/course/homepage/dark/ht11/floating-point-details.pdf
+
+Handbook of FP Arithmetics, Muller & co (Book, 579pp)
+        http://perso.ens-lyon.fr/jean-michel.muller/Handbook.html
