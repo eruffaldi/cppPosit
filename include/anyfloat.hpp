@@ -106,7 +106,7 @@ public:
 	static constexpr anyfloat_emu ninf() { return anyfloat_emu(DeepInit(),trait_t::ninfinity_h); }
 	static constexpr anyfloat_emu max() { return anyfloat_emu(DeepInit(),trait_t::max_h); }
 	static constexpr anyfloat_emu min() { return anyfloat_emu(DeepInit(),trait_t::min_h); }
-	static constexpr anyfloat_emu lowest() { return anyfloat_emu(DeepInit(),-trait_t::max_h); }
+	static constexpr anyfloat_emu lowest() { return anyfloat_emu(DeepInit(),trait_t::lowest_h); }
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
 	static constexpr anyfloat_emu nan() { return anyfloat_emu(DeepInit(),trait_t::nan_h); }
