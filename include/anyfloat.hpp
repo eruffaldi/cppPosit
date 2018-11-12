@@ -64,7 +64,7 @@ public:
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
     constexpr bool hasNaN() const { return true; }
 	//constexpr bool isNaN() const { return v ==  && v == trait_t::POSIT_NAN; } 
-	constexpr bool isnegative() const { return (v & signbit) != 0; } //(v &POSIT_SIGNBIT) != 0; }
+	constexpr bool isnegative() const { return (v & trait_t::signbit) != 0; } //(v &POSIT_SIGNBIT) != 0; }
 	//constexpr bool isinfinity() const { return v == trait_t::POSIT_PINF || v == trait_t::POSIT_NINF; }
 	constexpr bool iszero() const { return v == 0; }
 	//constexpr bool isone() const { return v == trait_t::POSIT_ONE; }
