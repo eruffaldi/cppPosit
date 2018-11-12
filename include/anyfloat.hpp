@@ -103,7 +103,7 @@ public:
 	static constexpr anyfloat_emu zero() { return anyfloat_emu(DeepInit(),0); }
 	static constexpr anyfloat_emu inf() { return anyfloat_emu(DeepInit(),trait_t::pinfinity_h); }
 	static constexpr anyfloat_emu pinf() { return anyfloat_emu(DeepInit(),trait_t::pinfinity_h); }
-	static constexpr anyfloat_emu ninf() { return anyfloat_emu(DeepInit(),trait_t::pinfinity_h); }
+	static constexpr anyfloat_emu ninf() { return anyfloat_emu(DeepInit(),trait_t::ninfinity_h); }
 	static constexpr anyfloat_emu max() { return anyfloat_emu(DeepInit(),trait_t::max_h); }
 	static constexpr anyfloat_emu min() { return anyfloat_emu(DeepInit(),trait_t::min_h); }
 	static constexpr anyfloat_emu lowest() { return anyfloat_emu(DeepInit(),-trait_t::max_h); }
