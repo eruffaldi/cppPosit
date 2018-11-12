@@ -245,3 +245,6 @@ Slides
 
 Handbook of FP Arithmetics, Muller & co (Book, 579pp)
         http://perso.ens-lyon.fr/jean-michel.muller/Handbook.html
+
+Fixed Point sg14: https://github.com/johnmcfarlane/fixed_point/blob/develop/doc/p0037.md
+Fixed Point Compositional (after sg14): http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0554r0.html
