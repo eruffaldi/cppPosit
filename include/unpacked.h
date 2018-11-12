@@ -517,7 +517,6 @@ CONSTEXPR14 Unpacked<FT, ET>& Unpacked<FT, ET>::unpack_xfloati(
     // denormalized
     else {
       int k = findbitleftmostC(fraction);
-      auto tmp = fraction;
       exponent -= k;
       fraction <<= (k + 1);
       //std::cout << typeid(Trait).name() << "unpacking: denormalized (rawexp=0,fraction=" <<  (int)tmp << ") unpacked as  (exp=" << exponent << ",fraction=" << (int)fraction << ")"<< std::endl;
