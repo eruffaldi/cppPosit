@@ -61,6 +61,7 @@ struct any_floattrait
      one_h = bitmask<holder_t>(exp_bits-1) << (frac_bits), // 0 0 1[e-1] 0[f]
      //afterone_h = one_h+1, // 0 0 1[e-1] 0[f-1] 1
      max_h = (bitmask<holder_t>(exp_bits-1) << (frac_bits+1)) | bitmask<holder_t>(frac_bits), // 0 1[e-1] 0 1[f]
+     lowest_h = max_h | signbit,
      min_h = ((holder_t)(1)) << frac_bits, // 0 0[e-1] 1 0[f]
      two_h = ((holder_t)(1)) << (exp_bits-1+frac_bits) // 0 1 0[e-1+f]
  };
@@ -90,6 +91,7 @@ struct half_trait // : public any_floattrait<5,10,halffloat,uint16_t>
     static constexpr holder_t two_h = 0x4000; 
     static constexpr holder_t max_h = 0x7bff; 
     static constexpr holder_t min_h = 0x0400;
+    static constexpr holder_t lowest_h = 0xfbff; // -max_h
     // max subnormal 0 00000 1111111111 2−24 ≈ 6.09756 × 10−5
     // min subnormal 0 00000 0000000001 5.96046 × 10−8
 
@@ -153,6 +155,7 @@ struct double_trait
     static constexpr holder_t one_h = 0x3ff0000000000000ULL;
     static constexpr holder_t two_h = 0x4000000000000000ULL;
     static constexpr holder_t max_h = 0x7fefffffffffffff; // TODO
+    static constexpr holder_t lowest_h = 0xffefffffffffffff; // TODO
     static constexpr holder_t min_h = 0x10000000000000; // TODO
 
 	static constexpr int data_bits = 64; // can be derived from value_t
@@ -185,6 +188,7 @@ struct float128_trait
     static constexpr holder_t one_h = 0xd00007f975243fff8000000000000000;
     static constexpr holder_t two_h = 0x40000000000000000000000000000000;
     static constexpr holder_t max_h = 0x4000; // TODO
+    static constexpr holder_t lowest_h = 0x4000; // TODO
     static constexpr holder_t min_h = 0x4000; // TODO
 
 	static constexpr int data_bits = 128; // can be derived from value_t

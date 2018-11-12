@@ -38,17 +38,20 @@ void itest_anyfloat() {
   	//	std::cout << i << ": " << XFT(XFT::DeepInit(),*(int*)(unsigned *)&i) << std::endl;
   	for(int i = 0 ; i < 256; i++)
   	{
-  		double d = XFT(XFT::DeepInit(),i);
+  		XFT x(XFT::DeepInit(),i);
+  		double d = x;
   		double dd  = XFT(d);
+  		unsigned int rawexp = (i >> XFT::vfractionbits) & 0x1F; //bitmask<int>(XFT::vexpbits);
+
   		/*
-  		TODO fix conversion from that double to binary8
+  		TODO fix conversion from that double to binary8:: unpack to denormalized 
   		1: 1.52588e-05 -> 0 0
 		2: 3.05176e-05 -> 0 0
   		*/
   		if(d  != dd)
-	  		std::cout << i << ": " << d << " -> " << dd << " " << (d==dd) << std::endl;
+	  		std::cout << i << ": " << d << " -> " << dd << " " << (d==dd) << " exp " << rawexp << " hex " << std::hex << i << std::dec << std::endl;
 	  	else
-	  		std::cout << i << ": " << d << std::endl;
+	  		std::cout << i << ": " << d << " exp " << rawexp << std::endl;
 
   	}
   }

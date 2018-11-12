@@ -13,7 +13,7 @@ template <int expbits, int fractionbits, class value_t, class holder_t, class im
 class anyfloat_emu
 {
 public:
-    enum { totalbits = expbits+fractionbits+1, vtotalbits = totalbits, vexpbits = expbits};
+    enum { totalbits = expbits+fractionbits+1, vfractionbits = fractionbits, vtotalbits = totalbits, vexpbits = expbits};
 	struct DeepInit{};
 
 	static_assert(std::is_unsigned<holder_t>::value,"anyfloat_emu works with unsigned holders");
