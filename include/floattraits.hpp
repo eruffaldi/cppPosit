@@ -59,7 +59,7 @@ struct any_floattrait
     // many nan ar possible, we pick the one with 
      nan_h = bitmask<holder_t>(exp_bits+1) << (frac_bits-1), // 0 1[e] 1 0[f-1]
      one_h = bitmask<holder_t>(exp_bits-1) << (frac_bits), // 0 0 1[e-1] 0[f]
-     //afterone_h = one_h+1, // 0 0 1[e-1] 0[f-1] 1
+     afterone_h = one_h+1, // 0 0 1[e-1] 0[f-1] 1
      max_h = (bitmask<holder_t>(exp_bits-1) << (frac_bits+1)) | bitmask<holder_t>(frac_bits), // 0 1[e-1] 0 1[f]
      lowest_h = max_h | signbit,
      min_h = ((holder_t)(1)) << frac_bits, // 0 0[e-1] 1 0[f]

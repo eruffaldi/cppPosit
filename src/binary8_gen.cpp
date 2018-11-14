@@ -1,4 +1,3 @@
-#if 0
 /**
  * Emanuele Ruffaldi (C) 2017
  * Templated C++ Posit
@@ -6,14 +5,16 @@
 #include <typeinfo>
 #include <fstream>
 #include <iostream>
-#include "anyfloat.h"
+#include "binary8.hpp"
+#include "anyfloat.hpp"
 
 #define SIGNEX(v, sb) ((v) | (((v) & (1 << (sb))) ? ~((1 << (sb))-1) : 0))
 
 int main(int argc, char const *argv[])
 {
+	// template <int expbits, int fractionbits, class value_t, class holder_t, class impl_t>
 	// match the posit8 from posit8.hpp
-	using X=Posit<typename posit8::PT::POSIT_STYPE,8,posit8::PT::POSIT_ESP_SIZE,typename posit8::FT,posit8::PT::positspec>;
+	using X=anyfloat_emu<BINARY8_EXP,BINARY8_MAN,int8_t,uint8_t, float>;
 	union Q {
 		float f;
 		uint32_t i;
@@ -100,4 +101,3 @@ int main(int argc, char const *argv[])
 	return  0;
 }
 
-#endif
