@@ -48,7 +48,7 @@ struct any_floattrait
 	static constexpr int fraction_bits = frac_bits;
 	static constexpr int exponent_bias = (1<<(exp_bits-1))-1; 
     static constexpr int exponent_max =  (1<<(exp_bits))-2;
-	static constexpr int with_denorm = with_denorm;
+	static constexpr int with_denorm = with_denorm_;
     static constexpr uint32_t exponent_mask = (1<<exponent_bits)-1;
 
     enum : holder_t {
@@ -70,20 +70,14 @@ struct any_floattrait
 
 
 // pulp8 alternative
-struct microfloat_trait : public any_floattrait<5,2,microfloat,uint8_t>
-{
-};
+using microfloat_trait =  any_floattrait<5,2,microfloat,uint8_t>;
 
 
 // PULP 8E,7M vs classic 5E,10P
-struct half_traitalt : public any_floattrait<8,7,halffloatalt,uint16_t>
-{
-};
+using half_traitalt =  any_floattrait<8,7,halffloatalt,uint16_t>;
 
 // Intel bfloat16 as 8,7 without denormals
-struct bfloat16_trait : public any_floattrait<8,7,halffloatalt,uint16_t, false>
-{
-};
+using bfloat16_trait = any_floattrait<8,7,halffloatalt,uint16_t, false>;
 
 // https://en.wikipedia.org/wiki/16-bit
 struct half_trait // : public any_floattrait<5,10,halffloat,uint16_t>
