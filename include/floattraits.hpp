@@ -34,7 +34,7 @@ struct microfloat : public valuewrap<uint8_t>
 
 /// holder_T is an unsigned integer capable of storing 1+exp_bits+frac_bits exactly
 /// value_T  is the struct or native type used for this 
-template <int exp_bits, int frac_bits, class value_T, class holder_T>
+template <int exp_bits, int frac_bits, class value_T, class holder_T, bool with_denorm_ = true>
 struct any_floattrait
 {
     using value_t = value_T;
@@ -48,6 +48,7 @@ struct any_floattrait
 	static constexpr int fraction_bits = frac_bits;
 	static constexpr int exponent_bias = (1<<(exp_bits-1))-1; 
     static constexpr int exponent_max =  (1<<(exp_bits))-2;
+	static constexpr int with_denorm = with_denorm;
     static constexpr uint32_t exponent_mask = (1<<exponent_bits)-1;
 
     enum : holder_t {
@@ -79,6 +80,11 @@ struct half_traitalt : public any_floattrait<8,7,halffloatalt,uint16_t>
 {
 };
 
+// Intel bfloat16 as 8,7 without denormals
+struct bfloat16_trait : public any_floattrait<8,7,halffloatalt,uint16_t, false>
+{
+};
+
 // https://en.wikipedia.org/wiki/16-bit
 struct half_trait // : public any_floattrait<5,10,halffloat,uint16_t>
 {
@@ -92,6 +98,7 @@ struct half_trait // : public any_floattrait<5,10,halffloat,uint16_t>
     static constexpr holder_t max_h = 0x7bff; 
     static constexpr holder_t min_h = 0x0400;
     static constexpr holder_t lowest_h = 0xfbff; // -max_h
+	static constexpr int with_denorm = true;
     // max subnormal 0 00000 1111111111 2−24 ≈ 6.09756 × 10−5
     // min subnormal 0 00000 0000000001 5.96046 × 10−8
 
@@ -127,6 +134,7 @@ struct single_trait
     static constexpr holder_t denorm_min_h = 1; // just 1 after 0
     static constexpr holder_t epsilon_h = 0x34000000; // trickier
     static constexpr holder_t lowest_h = 0xff7fffff; // -max_h
+	static constexpr int with_denorm = true;
 
 	static constexpr int data_bits = 32; // can be derived from value_t
 	static constexpr int exponent_bits =  8;
@@ -157,6 +165,7 @@ struct double_trait
     static constexpr holder_t max_h = 0x7fefffffffffffff; // TODO
     static constexpr holder_t lowest_h = 0xffefffffffffffff; // TODO
     static constexpr holder_t min_h = 0x10000000000000; // TODO
+	static constexpr int with_denorm = true;
 
 	static constexpr int data_bits = 64; // can be derived from value_t
 	static constexpr int exponent_bits =  11;
@@ -190,6 +199,7 @@ struct float128_trait
     static constexpr holder_t max_h = 0x4000; // TODO
     static constexpr holder_t lowest_h = 0x4000; // TODO
     static constexpr holder_t min_h = 0x4000; // TODO
+	static constexpr int with_denorm = true;
 
 	static constexpr int data_bits = 128; // can be derived from value_t
 	static constexpr int exponent_bits =  15;

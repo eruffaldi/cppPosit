@@ -9,7 +9,7 @@
 #include <iostream>
 #include "unpacked.h"
 
-template <int expbits, int fractionbits, class value_t, class holder_t, class impl_t>
+template <int expbits, int fractionbits, class value_t, class holder_t, class impl_t, bool with_denorm_ = true>
 class anyfloat_emu
 {
 public:
@@ -23,7 +23,7 @@ public:
 
 	using T=holder_t;
 	using exponenttype=int;
-	using trait_t=any_floattrait<expbits,fractionbits,value_t,holder_t>;
+	using trait_t=any_floattrait<expbits,fractionbits,value_t,holder_t, with_denorm_>;
 	using FFT=impl_t; // float or double
 	using impl_trait = typename float2trait<impl_t>::trait ; 
     using UnpackedT=Unpacked<holder_t,exponenttype>;
