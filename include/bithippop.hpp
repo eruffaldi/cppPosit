@@ -14,7 +14,6 @@
 #endif
 
 #include <stdint.h>
-#include <type_traits>
 #include <bitset>
 
 // CPU detection x86
