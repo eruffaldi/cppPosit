@@ -17,7 +17,12 @@
 #include <type_traits>
 #include <bitset>
 
-#ifndef __arm__
+// CPU detection x86
+#if defined(__x86_64) || defined(_M_X64) || defined(_M_IX86) || defined(__i386__)
+#define __is_x86_any__
+#endif
+
+#ifdef __is_x86_any__
 #ifdef _MSC_VER
 #include <intrin.h>
 #include <immintrin.h>
@@ -157,7 +162,7 @@ CONSTEXPR14 T bitset_get(T input, int offset, int size)
 	auto M = bitmask<T>(size);
 	return (input >> offset) & M;
 }
-#if !defined(__arm__) && !defined(FPGAHLS) && defined(__BMI__)
+#if defined(__is_x86_any__) && !defined(FPGAHLS) && defined(__BMI__)
 /* CSIM
 inline uint64_t bitset_gethw(uint64_t input, int offset, int size)
 {

@@ -64,8 +64,8 @@ CONSTEXPR14 PP float2posit(typename Trait::holder_t value)
 
 	// Phase 4: UnpackedLow to Posit
 
-    auto rs = std::max(-reg + 1, reg + 2); 
-    auto es = std::min((int)(totalbits-rs-1),(int)esbits);
+    auto rs = -reg+1 > reg+2 ? -reg+1:reg+2; //std::max(-reg + 1, reg + 2);  MSVC issue
+    auto es = (totalbits-rs-1) < esbits ? (totalbits-rs-1): esbits; //std::min((int)(totalbits-rs-1),(int)esbits);  MSVC issue
 
     POSIT_UTYPE regbits = reg < 0 ? (PT::POSIT_HOLDER_MSB >> -reg) : (PT::POSIT_MASK << (PT::POSIT_HOLDER_SIZE-(reg+1))); // reg+1 bits on the left
 	POSIT_UTYPE eexp = msb_exp<POSIT_UTYPE,PT::POSIT_HOLDER_SIZE,esbits,(esbits == 00)>()(exp);

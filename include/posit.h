@@ -107,7 +107,8 @@ struct PositTrait
         int aindex = x ? (~pars == 0 ? POSIT_MAXREGIME_BITS : findbitleftmostC((POSIT_UTYPE)~pars)) : (pars == 0 ? POSIT_MAXREGIME_BITS : findbitleftmostC((POSIT_UTYPE)pars)); // index is LAST with !x
         int index = aindex; // aindex > POSIT_SIZE  ? POSIT_SIZE : aindex;
         int reg = x ? index-1 : -index;
-        int rs =  std::min((int)POSIT_MAXREGIME_BITS,index+1);
+        int rs =  POSIT_MAXREGIME_BITS < index+1 ? POSIT_MAXREGIME_BITS : index+1; //std::min((int)POSIT_MAXREGIME_BITS,index+1);
+
         /**
          if(x)
          {
@@ -667,9 +668,9 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,positspec>::pack_low(UnpackedLow x)
 
     // for reg>=0: 1 0[reg+1] => size is reg+2 
     // for reg <0: 0[-reg] 0  => size is reg+1
-    auto rs = std::max(-reg + 1, reg + 2); 
-    auto es = std::min((int)(totalbits-rs-1),(int)esbits);
-
+    auto rs = -reg+1 > reg+2 ? -reg+1:reg+2; //std::max(-reg + 1, reg + 2);  MSVC issue
+    auto es = (totalbits-rs-1) < esbits ? (totalbits-rs-1): esbits; //std::min((int)(totalbits-rs-1),(int)esbits);  MSVC issue
+    
 
     POSIT_UTYPE regbits = reg < 0 ? (PT::POSIT_HOLDER_MSB >> -reg) : (PT::POSIT_MASK << (PT::POSIT_HOLDER_SIZE-(reg+1))); // reg+1 bits on the left
 	POSIT_UTYPE eexp = msb_exp<POSIT_UTYPE,PT::POSIT_HOLDER_SIZE,esbits,(esbits == 00)>()(exp);
@@ -824,7 +825,7 @@ auto Posit<T,totalbits,esbits,FT,positspec>::analyze() -> info
     	i.exp = exp;
     	i.rs = rs;
     	i.k = reg;
-    	i.es = std::min((int)(totalbits-rs-1),(int)esbits);
+    	i.es = totalbits-rs-1 < esbits ? totalbits-rs-1 : esbits; // std::min((int)(totalbits-rs-1),(int)esbits); MSVC issue
     	i.fs = totalbits-rs-i.es-1; 
     	return i;
     }
