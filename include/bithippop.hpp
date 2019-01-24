@@ -18,7 +18,11 @@
 #include <bitset>
 
 #ifndef __arm__
-#include "x86intrin.h"
+#ifdef _MSC_VER
+#include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
 #endif
 
 #ifndef CONSTEXPR14
@@ -87,7 +91,9 @@ CLZCONSTEXPR inline int findbitleftmostC(uint8_t input)
 	return __builtin_clz((uint32_t)input) - 24;
 }
 
+#if 0
 #if !defined(__arm__) && !defined(FPGAHLS)
+# make a more realiable detection
 inline int findbitleftmost(uint8_t input)
 {
 	return __lzcnt16(input) - 8;
@@ -102,7 +108,6 @@ inline int findbitleftmost(uint32_t input)
 {
 	return __lzcnt32(input);
 }
-
 /* CSIM
  inline int findbitleftmost(uint64_t input)
 {
@@ -112,6 +117,7 @@ inline int findbitleftmost(uint32_t input)
 
 // detect constexpr for X so we can speedup
 #define findbitleftmost(X) (isprvalconstexpr(X) ? findbitleftmostC(X) : findbitleftmost(X))
+#endif
 #endif
 
 // indices are with 0 on the right

@@ -222,7 +222,16 @@ public:
 		constexpr PositMul(Posit av, Posit bv) : a(av),b(bv) {}
 		Posit a,b;
 
-		constexpr operator Posit() const { return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack()); }
+		constexpr Posit asPosit() const { return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack()); }
+
+		constexpr operator Posit() const { return asPosit(); }
+
+		constexpr operator UnpackedT() const { return asPosit(); }
+	#ifndef FPGAHLS
+		constexpr operator float() const { return asPosit(); }
+		constexpr operator double() const { return asPosit(); }
+	#endif
+		constexpr operator int() const { return asPosit(); }
 
 		// pa.a*pa.b+pb.a*pb.b => 
 		friend constexpr Posit operator+(const PositMul & pa, const PositMul & pb) 
