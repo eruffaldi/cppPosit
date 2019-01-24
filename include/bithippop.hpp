@@ -20,6 +20,7 @@
 #ifndef __arm__
 #ifdef _MSC_VER
 #include <intrin.h>
+#include <immintrin.h>
 #else
 #include <x86intrin.h>
 #endif
@@ -33,7 +34,7 @@
 #endif
 #endif
 
-#ifndef FPGAHLS
+#if !defined(FPGAHLS) && !defined(_MSC_VER)
 #define CLZCONSTEXPR constexpr
 #else
 #define CLZCONSTEXPR
@@ -56,6 +57,16 @@ constexpr typename std::remove_reference<T>::type makeprval(T &&t)
 }
 
 #define isprvalconstexpr(e) noexcept(makeprval(e))
+
+#ifdef _MSC_VER
+	// note this is not constexpr due to _BitScanReverse
+	static uint32_t __inline __builtin_clz(uint32_t x) 
+	{
+        unsigned long r = 0;
+        _BitScanReverse(&r, x);
+        return (31-r);
+    }
+#endif
 
 // __builtin_clzll
 CLZCONSTEXPR inline uint64_t __builtin_clz64(uint64_t v)
@@ -146,7 +157,7 @@ CONSTEXPR14 T bitset_get(T input, int offset, int size)
 	auto M = bitmask<T>(size);
 	return (input >> offset) & M;
 }
-#if !defined(__arm__) && !defined(FPGAHLS)
+#if !defined(__arm__) && !defined(FPGAHLS) && defined(__BMI__)
 /* CSIM
 inline uint64_t bitset_gethw(uint64_t input, int offset, int size)
 {
