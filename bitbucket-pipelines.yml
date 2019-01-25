@@ -4,17 +4,17 @@
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
 #image: gcc-cmake:gcc-8
-image: gcc:8.2
+image: rikorose/gcc-cmake:gcc-8
+#image: gcc:8.2
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - apt-get update
-          - apt-get install -y cmake
-          - cmake .
+          #- apt-get update
+          #- apt-get install -y cmake
           - mkdir build
           - cd build
           - cmake ..
           - make 
-          - make test
+          #- make test
