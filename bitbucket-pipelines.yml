@@ -15,6 +15,6 @@ pipelines:
           #- apt-get install -y cmake
           - mkdir build
           - cd build
-          - cmake ..
+          - cmake -DSOFTFLOAT=OFF ..
           - make 
           #- make test
