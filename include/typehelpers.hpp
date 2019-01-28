@@ -26,7 +26,7 @@ namespace detail_least
 #endif
 	template<> struct int_least_helper<2> { typedef int64_t least; };
 	template<> struct int_least_helper<3> { typedef int32_t least; };
-	template<> struct int_least_helper<4> { typedef int16_t l                                                                                            1waeast; };
+	template<> struct int_least_helper<4> { typedef int16_t least; };
 	template<> struct int_least_helper<5> { typedef int8_t least; };
 
 }
