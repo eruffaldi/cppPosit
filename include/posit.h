@@ -223,21 +223,27 @@ public:
 		constexpr PositMul(Posit av, Posit bv) : a(av),b(bv) {}
 		Posit a,b;
 
-		constexpr Posit asPosit() const { return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack()); }
+		CONSTEXPR14 Posit asPosit() const { return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack()); }
 
-		constexpr operator Posit() const { return asPosit(); }
+		CONSTEXPR14 operator Posit() const { return asPosit(); }
 
-		constexpr operator UnpackedT() const { return asPosit(); }
+		CONSTEXPR14 operator UnpackedT() const { return asPosit(); }
 	#ifndef FPGAHLS
-		constexpr operator float() const { return asPosit(); }
-		constexpr operator double() const { return asPosit(); }
+		CONSTEXPR14 operator float() const { return asPosit(); }
+		CONSTEXPR14 operator double() const { return asPosit(); }
 	#endif
-		constexpr operator int() const { return asPosit(); }
+		CONSTEXPR14 operator int() const { return asPosit(); }
 
 		// pa.a*pa.b+pb.a*pb.b => 
-		friend constexpr Posit operator+(const PositMul & pa, const PositMul & pb) 
+		friend CONSTEXPR14 Posit operator+(const PositMul & pa, const PositMul & pb) 
 		{
 			return pack_posit<T,totalbits,esbits,FT,positspec>(pa.a.unpack()*pa.b.unpack()+pb.a.unpack()*pb.b.unpack()); 
+		}
+
+		// pa.a*pa.b-pb.a*pb.b => 
+		friend CONSTEXPR14 Posit operator-(const PositMul & pa, const PositMul & pb) 
+		{
+			return pack_posit<T,totalbits,esbits,FT,positspec>(pa.a.unpack()*pa.b.unpack()-pb.a.unpack()*pb.b.unpack()); 
 		}
 
 		// missing operators
@@ -387,7 +393,8 @@ public:
 	constexpr Posit operator-() const { return neg(); } 
 	constexpr Posit operator~() const { return inv(); } 
 	friend constexpr Posit operator-(const Posit & a, const Posit & b)  { return a + (-b); }
-	friend constexpr Posit operator/(const Posit & a, const Posit & b)  { return pack_posit< T,totalbits,esbits,FT,positspec> (a.unpack()/b.unpack()); }
+	friend CONSTEXPR14 Posit operator/(const Posit & a, const Posit & b)  { return pack_posit< T,totalbits,esbits,FT,positspec> (a.unpack()/b.unpack()); }
+    Posit & operator/= (const Posit & a) { auto x = *this / a; v = x.v; return *this; }
 
 
    
@@ -914,7 +921,7 @@ namespace std
 	  static constexpr T max() noexcept { return T::max(); }
 	  static constexpr T lowest() noexcept { return T::lowest	(); }
 	  //static constexpr int  digits = 0; number of digits (in radix base) in the mantissa 
-	  //static constexpr int  digits10 = 0;
+	  static constexpr int  digits10 = ((totalbits-3)*30000)/100000;  // *log10(2)
 	  static constexpr bool is_signed = true;
 	  static constexpr bool is_integer = false;
 	  static constexpr bool is_exact = false;

@@ -3,7 +3,9 @@ script: cmake
 compiler: g++
 
 before_script:
+  - gcc --version
   - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+  - gcc --version
   # create a build folder for the out-of-source build
   - mkdir build
   # switch to build directory
@@ -18,7 +20,6 @@ script:
   # if the project uses ctest we can run the tests like this
   - make test
 
-  - gcc --version
 addons:
   apt:
     sources:
