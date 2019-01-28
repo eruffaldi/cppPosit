@@ -8,7 +8,8 @@
 #include <inttypes.h>
 
 #if (defined(__llvm__) && __clang_major__ > 3) || (defined(__GNUC__) && __GNUC__ >= 4) || defined(__INTEL_COMPILER)
-#define HAS128T
+typedef int signed128 __attribute__((mode(TI)));
+typedef unsigned unsigned128 __attribute__((mode(TI)));
 #endif
 
 /// returns the larges type between two
@@ -21,7 +22,7 @@ namespace detail_least
 {
 	template< int Category > struct int_least_helper {}; 
 #ifdef HAS128T
-	template<> struct int_least_helper<1> { typedef __int128 least; };
+	template<> struct int_least_helper<1> { typedef signed128 least; };
 #endif
 	template<> struct int_least_helper<2> { typedef int64_t least; };
 	template<> struct int_least_helper<3> { typedef int32_t least; };
@@ -72,7 +73,7 @@ struct nextinttype
 template <>
 struct nextinttype<uint64_t>
 {
-	using type = unsigned __int128;
+	using type = unsigned signed128;
 };
 #endif
 
@@ -98,7 +99,7 @@ struct nextinttype<uint8_t>
 template <>
 struct nextinttype<int64_t>
 {
-	using type = __int128;
+	using type = signed128;
 };
 #endif
 
