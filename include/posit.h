@@ -178,7 +178,7 @@ struct UnpackedLow_t
 {
 	using Type = typename UT::Type;
 
-	constexpr UnpackedLow_t(Type t): type(t), negativeSign(false), regime(0),exp(0), fraction(0) {}
+	constexpr UnpackedLow_t(Type t): type(t), negativeSign(false), regime(0),exp(0),fraction(0) {}
 	constexpr UnpackedLow_t(Type t, bool anegativeSign): type(t), negativeSign(anegativeSign), regime(0),exp(0),fraction(0) {}
 	constexpr UnpackedLow_t(bool n, typename PT::POSIT_STYPE r, typename PT::POSIT_UTYPE e, typename PT::POSIT_UTYPE f):
 		 type(UT::Regular),negativeSign(n), regime(r), exp(e), fraction(f) {}
