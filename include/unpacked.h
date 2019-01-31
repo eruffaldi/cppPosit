@@ -23,7 +23,12 @@
 #include "typehelpers.hpp"
 
 #if !defined(FPGAHLS) && defined(HAS128T)
-inline std::ostream &operator<<(std::ostream &ons, __int128_t x)
+inline std::ostream &operator<<(std::ostream &ons, signed128 x)
+{
+  ons << "cannot print int128";
+  return ons;
+}
+inline std::ostream &operator<<(std::ostream &ons, unsigned128 x)
 {
   ons << "cannot print int128";
   return ons;
