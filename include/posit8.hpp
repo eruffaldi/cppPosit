@@ -51,6 +51,9 @@ public:
 	explicit posit8(double a);
 	explicit posit8(float a);
 	posit8(int a);
+#ifdef POSITMUL
+	posit8(FPT::PositMul x) : v(x.asPosit().v) {}
+#endif
 	explicit posit8(DeepInit , int8_t a) : v(a) {}
 	posit8(): v(0) {}
 	explicit posit8(FPT x) : v(x.v) {}

@@ -218,6 +218,7 @@ public:
 	using exponenttype = typename PT::exponenttype;
 	T v; // index in the N2 space
 
+#ifdef POSITMUL
 	struct PositMul
 	{
 		constexpr PositMul(Posit av, Posit bv) : a(av),b(bv) {}
@@ -250,6 +251,7 @@ public:
 		// &
 		// -
 	};
+#endif
 
 	CONSTEXPR14 Posit half() const;
 	CONSTEXPR14 Posit twice() const;
@@ -341,6 +343,7 @@ public:
 
 	    // Level 1: unpacked
 	// Level 0: something using posit specialties
+#ifdef POSITMUL
 	friend constexpr PositMul operator*(const Posit & a, const Posit & b) 
 	{
 		return PositMul(a,b); 
@@ -355,6 +358,13 @@ public:
 	{
 		return fma(a.a,a.b,b);
 	}
+
+#else
+	friend constexpr Posit operator*(const Posit & a, const Posit & b) 
+	{
+		return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack());
+	}
+#endif
 
 	friend constexpr Posit fma(const Posit & a, const Posit & b, const Posit & c)
 	{

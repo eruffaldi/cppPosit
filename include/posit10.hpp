@@ -52,6 +52,9 @@ public:
 	explicit posit10(float a);
 	posit10(int a);
 	explicit posit10(DeepInit , int16_t a) : v(a) {}
+#ifdef POSITMUL
+	posit10(FPT::PositMul x) : v(x.asPosit().v) {}
+#endif
 	posit10() : v(0) {}
 	explicit posit10(FPT x) : v(x.v) {}
 	explicit posit10(UnpackedLow u) : v(FPT(u).v) {}

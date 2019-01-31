@@ -45,6 +45,9 @@ public:
 	explicit posit12(double a);
 	explicit posit12(float a);
 	posit12(int a);
+#ifdef POSITMUL
+	posit12(FPT::PositMul x) : v(x.asPosit().v) {}
+#endif
 	explicit posit12(DeepInit , int16_t a) : v(a) {}
 	posit12(): v(0) {}
 	explicit posit12(FPT x) : v(x.v) {}
