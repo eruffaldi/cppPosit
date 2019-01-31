@@ -344,7 +344,7 @@ public:
 	    // Level 1: unpacked
 	// Level 0: something using posit specialties
 #ifdef POSITMUL
-	friend constexpr PositMul operator*(const Posit & a, const Posit & b) 
+	friend CONSTEXPR14 PositMul operator*(const Posit & a, const Posit & b) 
 	{
 		return PositMul(a,b); 
 	}
@@ -360,13 +360,13 @@ public:
 	}
 
 #else
-	friend constexpr Posit operator*(const Posit & a, const Posit & b) 
+	friend CONSTEXPR14 Posit operator*(const Posit & a, const Posit & b) 
 	{
 		return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack());
 	}
 #endif
 
-	friend constexpr Posit fma(const Posit & a, const Posit & b, const Posit & c)
+	friend CONSTEXPR14 Posit fma(const Posit & a, const Posit & b, const Posit & c)
 	{
 		return pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()*b.unpack()+c.unpack());
 	}
@@ -376,7 +376,7 @@ public:
 		*this = pack_posit<T,totalbits,esbits,FT,positspec>(unpack()*b.unpack());
 		return *this;
 	}
-    friend constexpr Posit operator+(const Posit & a, const Posit & b)
+    friend CONSTEXPR14 Posit operator+(const Posit & a, const Posit & b)
     {
         return a.iszero() ? b : b.iszero() ? a: pack_posit<T,totalbits,esbits,FT,positspec>(a.unpack()+b.unpack());
     }
