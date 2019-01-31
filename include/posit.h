@@ -107,7 +107,7 @@ struct PositTrait
         int aindex = x ? (~pars == 0 ? POSIT_MAXREGIME_BITS : findbitleftmostC((POSIT_UTYPE)~pars)) : (pars == 0 ? POSIT_MAXREGIME_BITS : findbitleftmostC((POSIT_UTYPE)pars)); // index is LAST with !x
         int index = aindex; // aindex > POSIT_SIZE  ? POSIT_SIZE : aindex;
         int reg = x ? index-1 : -index;
-        int rs =  POSIT_MAXREGIME_BITS < index+1 ? POSIT_MAXREGIME_BITS : index+1; //std::min((int)POSIT_MAXREGIME_BITS,index+1);
+        int rs =  (int)POSIT_MAXREGIME_BITS < index+1 ? POSIT_MAXREGIME_BITS : index+1; //std::min((int)POSIT_MAXREGIME_BITS,index+1);
 
         /**
          if(x)
