@@ -341,3 +341,12 @@ struct cast_right_to_left : public cast_right_to_left_<A, abits, B, bbits, (abit
 	static_assert(std::is_unsigned<A>::value, "required unsigned A");
 	static_assert(std::is_unsigned<B>::value, "required unsigned B");
 };
+
+
+#if !defined(FPGAHLS) && defined(HAS128T)
+inline std::ostream &operator<<(std::ostream &ons, unsigned128 x)
+{
+  ons << 
+  return ons;
+}
+#endif

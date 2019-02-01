@@ -22,18 +22,6 @@
 #include "floattraits.hpp"
 #include "typehelpers.hpp"
 
-#if !defined(FPGAHLS) && defined(HAS128T)
-inline std::ostream &operator<<(std::ostream &ons, signed128 x)
-{
-  ons << "cannot print int128";
-  return ons;
-}
-inline std::ostream &operator<<(std::ostream &ons, unsigned128 x)
-{
-  ons << "cannot print int128";
-  return ons;
-}
-#endif
 
 template <class T>
 constexpr const T &clamp(const T &v, const T &lo, const T &hi)
@@ -266,8 +254,7 @@ struct Unpacked
           bfrac >>= 1;
         }
 
-        return Unpacked(
-            exp, (((typename nextinttype<FT>::type)afrac) << FT_bits) / bfrac,
+        return Unpacked(exp, nextintop<FT>::extradiv(((typename nextinttype<FT>::type)afrac) << FT_bits,bfrac),
             negativeSign);
 
         // return one()/(*this);
@@ -399,8 +386,7 @@ struct Unpacked
     {
       POSIT_LUTYPE afrac = FT_leftmost_bit | (a.fraction >> 1);
       POSIT_LUTYPE bfrac = FT_leftmost_bit | (b.fraction >> 1);
-      auto frac =
-          ((((typename nextinttype<FT>::type)afrac) * bfrac) >> FT_bits);
+      auto frac = nextintop<FT>::extramul(afrac,bfrac) >> FT_bits;
 #ifdef FPGAHLS
 #pragma HLS RESOURCE variable = frac core = Mul_LUT
 #endif
@@ -454,8 +440,7 @@ struct Unpacked
         }
         */
 
-      return Unpacked(
-          exp, (((typename nextinttype<FT>::type)afrac) << FT_bits) / bfrac,
+      return Unpacked(exp, nextintop<FT>::extradiv(((typename nextinttype<FT>::type)afrac) << FT_bits,bfrac),
           a.negativeSign ^ b.negativeSign);
     }
     case UnpackedDualSel(Zero, Zero):
