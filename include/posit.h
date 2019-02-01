@@ -402,7 +402,7 @@ public:
 	// custom operators
 	constexpr Posit operator-() const { return neg(); } 
 	constexpr Posit operator~() const { return inv(); } 
-	friend constexpr Posit operator-(const Posit & a, const Posit & b)  { return a + (-b); }
+	friend CONSTEXPR14 Posit operator-(const Posit & a, const Posit & b)  { return a + (-b); }
 	friend CONSTEXPR14 Posit operator/(const Posit & a, const Posit & b)  { return pack_posit< T,totalbits,esbits,FT,positspec> (a.unpack()/b.unpack()); }
     Posit & operator/= (const Posit & a) { auto x = *this / a; v = x.v; return *this; }
 
