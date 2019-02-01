@@ -83,8 +83,10 @@ if(BINARY8)
   endif()
 endif()
 
+if(BINARY8 OR POSIT8 OR POSIT10 OR POSIT12)
 add_library(posittab STATIC ${POSIT8_SRC} ${BINARY8_SRC} ${POSIT10_SRC} ${POSIT12_SRC})
 set_property(TARGET posittab PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include)
+endif()
 
 #if(BINARY8)
 #add_executable(testbinary8 tests/testbinary8.cpp)
