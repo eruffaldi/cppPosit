@@ -12,7 +12,7 @@ using float16n_t = halffloat;
 // use native F16C operation for conversion back & forth
 // https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_extract_epi16
 // https://db.in.tum.de/~finis/x86-intrin-cheatsheet-v2.1.pdf
-#if defined(__AVX__)
+#if defined(__AVX__) && defined(__F16C__)
 
 // for _mm_cvtph_ps 
 // for _mm_cvtss_f32
