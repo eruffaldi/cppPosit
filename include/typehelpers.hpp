@@ -8,7 +8,7 @@
 #include <inttypes.h>
 #include "bithippop.hpp"
 
-#if ((defined(__llvm__) && __clang_major__ > 3) || (defined(__GNUC__) && __GNUC__ >= 4) || defined(__INTEL_COMPILER))
+#if ((defined(__llvm__) && __clang_major__ > 3) || (defined(__GNUC__) && __GNUC__ >= 4) || defined(__INTEL_COMPILER)) && defined(__SIZEOF_INT128__)
 typedef int signed128 __attribute__((mode(TI)));
 typedef unsigned unsigned128 __attribute__((mode(TI)));
 #define HAS128T
@@ -63,6 +63,13 @@ struct signed128
 };
 #endif
 
+/// not implemented because we do not need it yet
+struct signed128
+{
+
+};
+
+/// used for fractional manipulation
 struct unsigned128
 {
 	uint64_t hi,lo;
@@ -82,7 +89,7 @@ struct unsigned128
 		return a.hi < b.hi && a.lo < b.lo;
 	}
 
-	friend unsigned128 operator - (unsigned128 a, unsigned128 b) 
+	friend CONSTEXPR14 unsigned128 operator - (unsigned128 a, unsigned128 b) 
 	{
 		unsigned128 r = unsigned128(a.hi-b.hi,a.lo-b.lo);
 		if(a.lo < b.lo)
@@ -91,7 +98,7 @@ struct unsigned128
 			return r;
 	}
 
-	friend unsigned128 operator + (unsigned128 a, unsigned128 b) 
+	friend CONSTEXPR14 unsigned128 operator + (unsigned128 a, unsigned128 b) 
 	{
 		unsigned128 r = unsigned128(a.hi+b.hi,a.lo+b.lo);
 		if(r.lo < a.lo)
@@ -100,7 +107,7 @@ struct unsigned128
 			return r;
 	}
 
-	unsigned128 operator << (int n) const 
+	CONSTEXPR14 unsigned128 operator << (int n) const 
 	{
 		unsigned128 r;
 		if(n >= 64)
@@ -120,7 +127,7 @@ struct unsigned128
 	}
 
 	// NOTE: n maximum 64
-	unsigned128 operator >> (int n) const 
+	CONSTEXPR14 unsigned128 operator >> (int n) const 
 	{
 		unsigned128 r;
 		if(n >= 64)
@@ -140,6 +147,15 @@ struct unsigned128
 	}
 };
 #define HAS128T
+
+namespace std
+{
+	template<>
+	class is_unsigned<unsigned128>:  std::true_type {};
+
+	template<>
+	class is_unsigned<signed128>:  std::false_type {};
+}
 #endif
 
 /// returns the larges type between two
@@ -152,20 +168,19 @@ namespace detail_least
 {
 	template< int Category > struct int_least_helper {}; 
 #ifdef HAS128T
-	template<> struct int_least_helper<1> { typedef unsigned128 least; };
+	template<> struct int_least_helper<1> { typedef signed128 signed_type;  typedef unsigned128 unsigned_type; };
 #endif
-	template<> struct int_least_helper<2> { typedef int64_t least; };
-	template<> struct int_least_helper<3> { typedef int32_t least; };
-	template<> struct int_least_helper<4> { typedef int16_t least; };
-	template<> struct int_least_helper<5> { typedef int8_t least; };
+	template<> struct int_least_helper<2> { typedef int64_t signed_type; typedef uint64_t unsigned_type; };
+	template<> struct int_least_helper<3> { typedef int32_t signed_type; typedef uint32_t unsigned_type; };
+	template<> struct int_least_helper<4> { typedef int16_t signed_type; typedef uint16_t unsigned_type; };
+	template<> struct int_least_helper<5> { typedef int8_t signed_type; typedef uint8_t unsigned_type; };
 
 }
 
 /// Given size in bits returns the integer with given size
 template <unsigned int N>
-struct int_least_bits
+struct int_least_bits : public detail_least::int_least_helper<((N) <= 8) + ((N) <= 16) + ((N) <= 32) + ((N) <= 64) + ((N) <= 128)> 
 {
-	 typedef typename detail_least::int_least_helper<((N) <= 8) + ((N) <= 16) + ((N) <= 32) + ((N) <= 64) + ((N) <= 128)>::least type;
 };
 
 /// Helper for avoiding the fact that int8_t and uint8_t are printerd as chars in iostream
@@ -296,7 +311,6 @@ CLZCONSTEXPR inline int findbitleftmostC(unsigned128 input)
 {
 	return input.hi !=0 ? findbitleftmostC(input.hi) + 64 : findbitleftmostC(input.lo);
 }
-
 
 template <>
 struct nextintop<uint64_t>

@@ -5,6 +5,8 @@ Implementation of Gustafoson Unum Type III aka Posits using C++ Templates.
 
 Initial inspiration was the existing C++ https://github.com/libcg/bfp but then we diverged a lot with several features as detailed below.
 
+Testing on Travis (GCC) and Appveyor (MSVC): [![Build Status](https://travis-ci.com/eruffaldi/cppPosit.svg?branch=master)](https://travis-ci.com/eruffaldi/cppPosit)
+
 # Comparison with other Posit in C++
 
 * https://github.com/libcg/bfp posit sizes specified dynamically by Clement Guerin

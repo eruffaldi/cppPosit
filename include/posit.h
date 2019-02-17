@@ -647,7 +647,7 @@ CONSTEXPR14 auto Posit<T,totalbits,esbits,FT,positspec>::unpack_low() const -> U
         int reg = q.first;
         int rs = q.second;
         POSIT_UTYPE pars2 = pars1 << rs; // MSB: ES FS
-        POSIT_UTYPE exp = bitset_leftmost_get_const<T,esbits>()(pars2); //        bitset_leftmost_getT(pars,esbits);
+        POSIT_UTYPE exp = bitset_leftmost_get_const<POSIT_UTYPE,esbits>()(pars2); //        bitset_leftmost_getT(pars,esbits);
         POSIT_UTYPE pars = pars2 << esbits; // MSB: FS left aligned in T
 
         return UnpackedLow(negativeSign,reg,exp,pars);
