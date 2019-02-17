@@ -5,6 +5,7 @@
  */
 #pragma once
 
+/// detection of FPGA Vivado Xilinx
 #if defined(__SDSVHLS__) && !defined(FPGAHLS)
 #define FPGAHLS
 #endif
@@ -30,6 +31,7 @@
 #endif
 #endif
 
+/// if C++14 or later then many operations become constexpr
 #ifndef CONSTEXPR14
 #if __cplusplus >= 201402L
 #define CONSTEXPR14 constexpr
@@ -38,13 +40,16 @@
 #endif
 #endif
 
+/// in most targets except FPGA and Microsoft Visual Studio CLZ is a constexpr 
+#ifndef CLZCONSTEXPR
 #if !defined(FPGAHLS) && !defined(_MSC_VER)
 #define CLZCONSTEXPR constexpr
 #else
 #define CLZCONSTEXPR
 #endif
+#endif
 
-// C version
+// C version of bitmask (better remove it)
 #define BIT_MASK(__TYPE__, __ONE_COUNT__) \
 	((__TYPE__)(-((__ONE_COUNT__) != 0))) & (((__TYPE__)-1) >> ((sizeof(__TYPE__) * 8) - (__ONE_COUNT__)))
 
@@ -209,17 +214,20 @@ uint8_t bitset_gethwT(uint8_t input)
 
 // with flexible arguments
 #define bitset_get(X, A, B) (isprvalconstexpr(X) && isprvalconstexpr(A) && isprvalconstexpr(B) ? bitset_gethw(X, A, B) : bitset_get(X, A, B))
+
 #else
 
 #define bitset_getT(X, A, B) (bitset_get<decltype(X), A, B>(X))
 
 #endif
+
 template <class T, int N>
 struct bitset_leftmost_get_const
 {
-	constexpr T operator()(T X) const
+	constexpr T operator()(T x) const
 	{
-		return (T)bitset_getT((typename std::make_unsigned<T>::type)(X), sizeof(X) * 8 - N, N);
+		static_assert(std::is_unsigned<T>::value);
+		return (T)(bitset_getT(x, sizeof(T) * 8 - N, N));
 	}
 };
 
@@ -259,8 +267,7 @@ constexpr T pcabs(T x)
 	return x < 0 ? -x : x;
 }
 
-///
-/// absolute value of signed integer without conditions
+/// absolute value of signed integer without branching...helps lazy compilers
 template <class T> // ,typename std::enable_if<std::is_integral<T>::value ,int>::type* = nullptr>
 CONSTEXPR14 T pabs(T x)
 {

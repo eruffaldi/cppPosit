@@ -495,7 +495,7 @@ CONSTEXPR14 Unpacked<FT, ET> &Unpacked<FT, ET>::unpack_xfixed(
   // TODO: handle infinity or nan in Trait
   if (nx != 0)
   {
-    using UT = typename std::make_unsigned<typename Trait::value_t>::type;
+    using UT = typename int_least_bits<sizeof(typename Trait::value_t)*8>::unsigned_type;
     type = Regular;
     negativeSign = nx < 0;
     UT x = pcabs(nx);
@@ -653,7 +653,7 @@ CONSTEXPR14 typename Trait::value_t Unpacked<FT, ET>::pack_xfixed() const
   else
   {
     using ST = typename Trait::value_t;
-    using UT = typename std::make_unsigned<ST>::type;
+    using UT = typename int_least_bits<sizeof(ST)*8>::unsigned_type;
     // fraction 1.xxxxx from left aligned over FT bytes to UT bytes still left
     // aligned over Trait::totalbits
     UT f = fraction_bit_extract<FT_bits, FT, Trait::totalbits, UT,
@@ -690,7 +690,7 @@ CONSTEXPR14 typename Trait::holder_t Unpacked<FT, ET>::pack_xfloati() const
     break;
   }
 
-  largest_type<ET, typename int_least_bits<Trait::exponent_bits>::type> fexp =
+  largest_type<ET, typename int_least_bits<Trait::exponent_bits>::signed_type> fexp =
       exponent;
   fexp += Trait::exponent_bias;
 
