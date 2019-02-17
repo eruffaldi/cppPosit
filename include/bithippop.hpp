@@ -226,7 +226,7 @@ struct bitset_leftmost_get_const
 {
 	constexpr T operator()(T x) const
 	{
-		static_assert(std::is_unsigned<T>::value);
+		static_assert(std::is_unsigned<T>::value,"bitset_leftmost_get_const expects unsigned");
 		return (T)(bitset_getT(x, sizeof(T) * 8 - N, N));
 	}
 };
