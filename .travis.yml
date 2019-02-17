@@ -1,6 +1,7 @@
 language: cpp
 script: cmake
 compiler: g++
+dist: xenial
 
 before_script:
   - gcc --version
@@ -20,10 +21,3 @@ script:
   # if the project uses ctest we can run the tests like this
   #- make test
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-5
-    - g++-5
