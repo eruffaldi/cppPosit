@@ -23,7 +23,7 @@ inline float uint32_to_float(uint32_t i)
 }
 #endif
 
-enum class PositSpec { WithNan, WithInf, WithNanInf};
+enum class PositSpec { NoNan, WithNan, WithNanInf };
 
 template <class T, int totalbits, int esbits, PositSpec positspec_ >
 struct PositTrait
@@ -35,7 +35,7 @@ struct PositTrait
 	using POSIT_STYPE = typename std::make_signed<T>::type;
 	using POSIT_UTYPE = typename std::make_unsigned<T>::type;
 	static constexpr PositSpec positspec = positspec_;
-	static constexpr bool withnan = positspec_ != PositSpec::WithInf;
+	static constexpr bool withnan = positspec_ != PositSpec::NoNan;
 	using exponenttype = typename std::conditional<(totalbits+esbits >= sizeof(T)*8),typename  nextinttype<T>::type,T>::type;
 
 	//enum : POSIT_UTYPE {
@@ -327,10 +327,10 @@ public:
 	CONSTEXPR14 Posit inv()  const;
 
 	// SFINAE optionally: template<typename U = T, class = typename std::enable_if<withnan, U>::type>
-    constexpr bool hasNaN() const { return positspec != PositSpec::WithInf; }
-	constexpr bool isNaN() const { return positspec != PositSpec::WithInf && v == PT::POSIT_NAN; } 
+    constexpr bool hasNaN() const { return positspec != PositSpec::NoNan; }
+	constexpr bool isNaN() const { return positspec != PositSpec::NoNan && v == PT::POSIT_NAN; } 
 	constexpr bool isnegative() const { return v < 0; } //(v &POSIT_SIGNBIT) != 0; }
-	constexpr bool isinfinity() const { return positspec != PositSpec::WithNan && (v == PT::POSIT_PINF || v == PT::POSIT_NINF); }
+	constexpr bool isinfinity() const { return positspec == PositSpec::WithNanInf && (v == PT::POSIT_PINF || v == PT::POSIT_NINF); }
 	constexpr bool iszero() const { return v == 0; }
 	constexpr bool isone() const { return v == PT::POSIT_ONE; }
 	constexpr Posit prev() const { return Posit(DeepInit(),v > PT::POSIT_MAXPOS || v <= PT::POSIT_MINNEG ? v : v-1); }
@@ -857,6 +857,23 @@ CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,positspec> & p) 
 	using PP=Posit<T,totalbits,esbits,FT,positspec>;
 	return PP::unpacked_low2full(p.unpack_low());
 }
+
+template <class T,int totalbits, int esbits, class FT, PositSpec positspec>
+auto log2(const Posit<T,totalbits,esbits,FT,positspec> & p) -> typename Posit<T,totalbits,esbits,FT,positspec>
+{
+	using PP=Posit<T,totalbits,esbits,FT,positspec>;
+	// +- 2^ 
+	if(p < 0)
+		return PP::nan();
+	else if(p == 0)
+		return PP::ninf();
+
+	auto u = unpack_posit(p);
+
+	// log2(2** (2**K r) * 2**E * F) = 2**K r + E + log2(F)
+	// 
+}
+
 
 #ifndef FPGAHLS
 template <class X>
