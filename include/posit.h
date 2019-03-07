@@ -469,22 +469,6 @@ public:
 	/// unitary range x(1-x)
 	constexpr Posit urDeltaPs() const { return (*this)*urOneMinus(); }
 
-	struct FullWriter
-	{
-		FullWriter(T x): ax(x) {}
-		T ax;
-	};	
-
-	FullWriter describe() const { return FullWriter(v); }
-
-#ifndef FPGAHLS
-	friend std::ostream & operator << (std::ostream &ons, const FullWriter & w)
-	{
-		return ons;
-	}
-#endif
-
-
 };
 
 #if 0
@@ -561,7 +545,27 @@ CONSTEXPR14 Posit<T,totalbits,esbits,FT,positspec>::Posit(int xvalue)
 template <class T, int totalbits, int esbits, class FT, PositSpec positspec>
 std::ostream & operator << (std::ostream & ons, Posit<T,totalbits,esbits,FT,positspec> const & o)
 {
-	ons << o.unpack();
+	// mapping std iostream flags as Posit printing
+	// - as float
+	// - as raw
+	// - as parsed
+	auto af = ons.flags();
+	auto f = af & std::ios::basefield;
+	ons.setf(std::ios::dec, std::ios::basefield);
+	if(f == std::ios::hex)
+	{
+		ons << o.v;
+	}
+	else if(f == std::ios::dec)
+	{
+		ons << (float)o;
+	}
+	else if(f == std::ios::oct)
+	{
+		ons << o.unpack();
+	}	
+	// reset
+	ons.setf(af & std::ios::basefield, std::ios::basefield);
 	return ons;
 }
 #endif
@@ -867,46 +871,8 @@ CONSTEXPR14 auto unpack_posit(const Posit<T,totalbits,esbits,FT,positspec> & p) 
 }
 
 #ifndef FPGAHLS
-template <class X>
-void printinfo(std::ostream & ons, typename X::value_t v)
-{
-	using Q= typename printableinttype<typename X::value_t>::type;
-	X x(typename X::DeepInit(),v); // load the posit OK
-	typename X::UnpackedT u(x.unpack()); // unpack it OK
-	X xux(u); // pack
-    typename X::info ii = x.analyze();
-    if(ii.infinity)
-    	ons << (X::PT::positspec == PositSpec::WithNanInf ? (ii.sign ? "posit(-infinity)" : "posit(+infinity)") : "posit(infinity)");
-    else if(ii.nan)
-    	ons << "posit(nan)";
-    else
-    {
-    	ons << " posit(" << (ii.sign ? "-" : "+") ;
-    	ons << " rs/es/fs:" << std::dec <<  ii.rs << "/" << ii.es << "/" << ii.fs << " ";
-    	ons << " k:" << std::dec << (Q)ii.k ;
-    	ons << " exp:" << std::dec << (1<<ii.exp);
-    	ons << " ifraction:" << std::hex << (Q)ii.ifraction;
-        ons << " binary:" << std::bitset<sizeof(typename X::value_t)*8>(xux.v) << ")";
-     }	
-}
-#endif
 
-#ifndef FPGAHLS
 
-template <class T>
-struct posit_formatter
-{
-public:
-	posit_formatter(T p): posit(p) {}
-
-	friend std::ostream & operator << (std::ostream & ons, const posit_formatter & x)
-	{
-		printinfo<T>(ons,x.posit.v);
-		return ons;
-	}
-
-	T posit;
-};
 #endif
 
 namespace std
