@@ -1,4 +1,12 @@
 /**
+ * Copyright (C) 2017-2019 Emanuele Ruffaldi
+ * Distributed under the terms of the BSD 3-Clause License.  
+ * 
+ * (See accompanying file LICENSE)
+ * 
+ * --
+ */
+/**
  - express the constants as integer and then use constexpr conversion to the Unpacked template
  - implement polevl and p1evl
  - implement ldexp

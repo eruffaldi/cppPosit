@@ -1,4 +1,12 @@
 /**
+ * Copyright (C) 2017-2019 Emanuele Ruffaldi
+ * Distributed under the terms of the BSD 3-Clause License.  
+ * 
+ * (See accompanying file LICENSE)
+ * 
+ * --
+ */
+/**
  * Expandedn one
  *
  g++ -I. --std=c++14 float2posit.hpp  -DTESTFLOAT2POSIT -c

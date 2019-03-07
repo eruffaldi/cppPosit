@@ -1,4 +1,12 @@
 /**
+ * Copyright (C) 2017-2019 Emanuele Ruffaldi
+ * Distributed under the terms of the BSD 3-Clause License.  
+ * 
+ * (See accompanying file LICENSE)
+ * 
+ * --
+ */
+/**
  * Requires: AVX2, allows for AVX512F
  *
  - missing: 64bit integer, unsigned integers except uint8
