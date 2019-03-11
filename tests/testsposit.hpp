@@ -14,6 +14,7 @@
 // Created by Emanuele Ruffaldi on 20/10/2017.
 //
 
+#include <iomanip>
 
 TEST_CASE( XA  "Unpacked Tests", SPOSIT ) {
     REQUIRE(X::UnpackedT(2.0).inv().inv() == X::UnpackedT(2.0));
@@ -53,8 +54,8 @@ TEST_CASE (XA "Conversions", SPOSIT)
         {
             std::cout  << "d   is " << f << std::endl;
             std::cout  << "du  is " << fu << std::endl;
-            std::cout  << "dp  is " << posit_formatter<X>(fp) << std::endl;
-            std::cout  << "dup is "  << posit_formatter<X>(fup) << std::endl;
+            std::cout  << "dp  is " << std::oct << fp << std::endl;
+            std::cout  << "dup is "  << std::oct << fup << std::endl;
              std::cout << "dupu is " << fupu << std::endl;
             // std::cout << "dpu is " << fpu << std::endl;
              std::cout << "dpud is " << fupuf << std::endl;

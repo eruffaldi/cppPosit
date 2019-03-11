@@ -6,11 +6,8 @@
  * 
  * --
  */
-	/**
- * Emanuele Ruffaldi (C) 2017
- * Templated C++ Posit
-
- Test
+/**
+Test
 
 #include "posit.h"
 using X=Posit<int32_t,4,0,uint32_t>;
@@ -31,8 +28,18 @@ inline float uint32_to_float(uint32_t i)
 }
 #endif
 
+/**
+ * Specifies the behavior of special numbers
+ *
+ * WithNan: one top Nan (or Nar in posit spec terminology)
+ * WithInf: one top Inf signless (original posit design)
+ * WithNanInf: one top Nan and two signed Infinites (for more float compatibility)
+ */
 enum class PositSpec { WithNan, WithInf, WithNanInf};
 
+/**
+ * Trait that provides the key properties of the Posit encoding
+ */
 template <class T, int totalbits, int esbits, PositSpec positspec_ >
 struct PositTrait
 {
@@ -177,7 +184,8 @@ CONSTEXPR14 Posit<T,totalbits,esbits,FT,positspec> pack_posit(const typename Pos
 
 
 /**
- * Minimal Unpacked representaiton of the Posit
+ * Unpacked representaiton of the Posit with (sign,regime,exponent,fraction)
+ * 
  * UT is UnpackedT
  * PT is the Trait
  */
@@ -191,12 +199,13 @@ struct UnpackedLow_t
 	constexpr UnpackedLow_t(bool n, typename PT::POSIT_STYPE r, typename PT::POSIT_UTYPE e, typename PT::POSIT_UTYPE f):
 		 type(UT::Regular),negativeSign(n), regime(r), exp(e), fraction(f) {}
 
-	Type type;
-	bool negativeSign; // for Regular and Infinity if applicabl
+	Type type; /// type of number: Regular, Zero, NaN, Infinity
+	bool negativeSign; // for Regular and Infinity
 	typename PT::POSIT_STYPE regime; // decoded with sign
 	typename PT::POSIT_UTYPE exp;    // decoded
 	typename PT::POSIT_UTYPE fraction; // fraction left aligned without 1.
 };
+
 /**
  * Stores the data in the MSB totalbits of T
  * Uses esbits bits
@@ -213,7 +222,7 @@ class Posit
 {
 public:
 	using PT=PositTrait<T,totalbits,esbits,positspec>;
-	static_assert(std::is_unsigned<FT>::value,"required unsigned FT");
+	//static_assert(std::is_unsigned<FT>::value,"required unsigned FT"); /// relaxed and delegated to Unpacked
 
 
     enum { vtotalbits = totalbits, vesbits = esbits};
@@ -414,7 +423,19 @@ public:
 	friend CONSTEXPR14 Posit operator/(const Posit & a, const Posit & b)  { return pack_posit< T,totalbits,esbits,FT,positspec> (a.unpack()/b.unpack()); }
     Posit & operator/= (const Posit & a) { auto x = *this / a; v = x.v; return *this; }
 
-
+    template <class It1, class It2>
+    static CONSTEXPR14 Posit dot(It1 begin1, It2 begin2, int N)
+    {
+    	if(N < 1)
+    		return Posit::zero(); 
+    	else
+    	{
+	    	auto v0 = (Posit(*begin1++)).unpack()*(Posit(*begin2++)).unpack(); // first
+	    	for(int i = 1; i < N; i++)
+		    	v0 += (Posit(*begin1++)).unpack()*(Posit(*begin2++)).unpack();
+	    	return Posit(v0);
+	    }
+    }
    
 	/*	
 	void setBits(POSIT_UTYPE bits)
@@ -879,6 +900,13 @@ namespace std
 {
 	template <class T,int totalbits, int esbits, class FT, PositSpec positspec>
 	inline CONSTEXPR14 Posit<T,totalbits,esbits,FT,positspec> abs(Posit<T,totalbits,esbits,FT,positspec> z) 
+	{
+		using PP=Posit<T,totalbits,esbits,FT,positspec>;
+		return PP(PP::DeepInit(),pcabs(z.v));
+	}
+
+	template <class T,int totalbits, int esbits, class FT, PositSpec positspec>
+	inline CONSTEXPR14 Posit<T,totalbits,esbits,FT,positspec> sqrt(Posit<T,totalbits,esbits,FT,positspec> z) 
 	{
 		using PP=Posit<T,totalbits,esbits,FT,positspec>;
 		return PP(PP::DeepInit(),pcabs(z.v));

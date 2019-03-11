@@ -43,11 +43,12 @@ constexpr T FLOORDIV(T a, T b)
   return ((a) / (b) - ((a) % (b) < 0));
 }
 
+
 template <class FT = uint64_t, class ET = int32_t>
 struct Unpacked
 {
   static_assert(std::is_unsigned<FT>::value,
-                "Unpacked requires unsigned fractiont type");
+                "Unpacked requires unsigned fractiont type or floating");
   static_assert(std::is_signed<ET>::value,
                 "Unpacked requires signed exponent type");
   using POSIT_LUTYPE = FT;
@@ -62,7 +63,6 @@ struct Unpacked
 #ifndef UnpackedDualSel
 #define UnpackedDualSel(a, b) ((a) + (b)*4)
 #endif
-
   enum Type
   {
     Regular,
@@ -70,6 +70,8 @@ struct Unpacked
     NaN,
     Zero
   }; /// signed infinity and nan require the extra X bit
+
+
   Type type = Regular;
   bool negativeSign = false;
   ET exponent = 0; // with sign
@@ -767,3 +769,39 @@ constexpr typename DstTrait::holder_t convertfloats(
                   int>::template make_floati<SrcTrait>(src)
       .template pack_xfloati<DstTrait>();
 }
+
+#if 0
+#ifndef FPGAHLS
+
+template <class ET>
+struct Unpacked<float,ET>
+{
+
+  struct single_tag
+  {
+  };
+
+  enum Type
+  {
+    Regular,
+    Infinity,
+    NaN,
+    Zero
+  }; /// signed infinity and nan require the extra X bit
+
+  float v;
+
+  Unpacked() : v(0) {}
+  Unpacked(float f) : v(f) {}
+
+  Unpacked(double f): v(f) {}
+
+  Unpacked(int f): v(f) {}
+
+  friend Unpacked operator+ (const Unpacked &a, const Unpacked & b) { return Unpacked(a.v+b.v); }
+  friend Unpacked operator- (const Unpacked &a, const Unpacked & b) { return Unpacked(a.v-b.v); }
+  friend Unpacked operator/ (const Unpacked &a, const Unpacked & b) { return Unpacked(a.v/b.v); }
+  friend Unpacked operator* (const Unpacked &a, const Unpacked & b) { return Unpacked(a.v*b.v); }
+};
+#endif
+#endif
