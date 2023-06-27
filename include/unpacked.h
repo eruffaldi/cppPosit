@@ -678,7 +678,7 @@ CONSTEXPR14 typename Trait::value_t Unpacked<FT, ET>::pack_xfixed() const
     // - exponent==-Trait::fraction_bits ==> 1 | 0
     // - exponent==intbits-1 ==> 0x8000000 | (F >> 1)
     ST r = (ST(1) << (exponent + Trait::fraction_bits)) |
-           (ST)(f >> (intbits - exponent));
+           (intbits - exponent < (signed)sizeof(f)*8 ? (ST)(f >> (intbits - exponent)) : 0);
     return negativeSign ? -r : r;
   }
 }
