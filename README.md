@@ -1,3 +1,9 @@
+This public version of cppPosit has been ARCHIVED and we have republished cppPosit to the new repistory: [https://federicorossifr.github.io/cppposit/](https://github.com/federicorossifr/cppposit)
+
+Please send all PR and comments there
+
+----
+
 
 # C++ Posit implementation 
 
